@@ -1,0 +1,6 @@
+{
+  "name": "FWATCH - Premium Movie & TV Streaming",
+  "description": "Stream movies and TV series with real TMDB metadata, multi-server streaming, dynamic SEO, and dark cinematic experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
