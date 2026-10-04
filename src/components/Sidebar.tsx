@@ -12,6 +12,7 @@ import {
   Crown,
   Play,
   Sparkles,
+  Tv,
 } from 'lucide-react';
 import { useUI } from '../context/UIContext';
 import { useWatchlist } from '../hooks/useWatchlist';
@@ -29,6 +30,7 @@ export function Sidebar() {
 
   const navItems = [
     { label: 'Discover', path: '/', icon: Compass },
+    { label: 'New Episodes', path: '/episodes', icon: Tv },
     { label: 'Anime', path: '/anime', icon: Sparkles },
     { label: 'Watchlist', path: '/watchlist', icon: Bookmark, badge: watchlist.length },
     { label: 'Popular People', path: '/people', icon: Users },

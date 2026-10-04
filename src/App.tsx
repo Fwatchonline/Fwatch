@@ -75,6 +75,7 @@ export default function App() {
             <Route path="/watchlist" element={<Favorites />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/episodes" element={<NewEpisodes />} />
+            <Route path="/new-episodes" element={<NewEpisodes />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/contact-us" element={<Contact />} />
             <Route path="/help" element={<Help />} />

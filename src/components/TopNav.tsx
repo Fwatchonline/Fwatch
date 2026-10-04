@@ -115,6 +115,7 @@ export function TopNav() {
     { label: 'All', path: '/' },
     { label: 'Movie', path: '/movies' },
     { label: 'Series', path: '/tv' },
+    { label: 'New Episodes', path: '/episodes' },
     { label: 'Anime', path: '/anime' },
   ];
 

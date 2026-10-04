@@ -187,3 +187,105 @@ export async function resolveVylaHls(
     error: 'No active direct HLS streams found from providers',
   };
 }
+
+export async function getVylaSubtitles(
+  tmdbId: number,
+  type: 'movie' | 'tv' = 'movie',
+  season?: number,
+  episode?: number
+) {
+  const s = type === 'tv' ? season || 1 : null;
+  const e = type === 'tv' ? episode || 1 : null;
+  const subKey = `${type}:${tmdbId}:${s}:${e}`;
+
+  const cached = SUBTITLES_CACHE.get(subKey);
+  if (cached && cached.expires > Date.now()) {
+    return cached.data;
+  }
+
+  try {
+    const rawSubs = await Promise.race([
+      vylaInstance.getSubtitles(tmdbId, s, e),
+      new Promise<any[]>((_, reject) =>
+        setTimeout(() => reject(new Error('Subtitles timeout')), 8000)
+      ),
+    ]).catch(() => []);
+
+    const mapped = (rawSubs || [])
+      .filter((sub: any) => sub?.file)
+      .slice(0, 100)
+      .map((sub: any, idx: number) => {
+        const label = sub.label || `Subtitle ${idx + 1}`;
+        const lang = label.toLowerCase().slice(0, 2);
+        return {
+          id: `vyla-sub-${idx}`,
+          language: lang,
+          label,
+          type: sub.type || 'vtt',
+          source: sub.source || 'vyla',
+          url: `/api/hls?url=${encodeURIComponent(sub.file)}`,
+          originalUrl: sub.file,
+        };
+      });
+
+    SUBTITLES_CACHE.set(subKey, { data: mapped, expires: Date.now() + CACHE_TTL });
+    return mapped;
+  } catch {
+    return [];
+  }
+}
+
+export async function getVylaDownloads(
+  tmdbId: number,
+  type: 'movie' | 'tv' = 'movie',
+  season?: number,
+  episode?: number
+) {
+  const s = type === 'tv' ? season || 1 : null;
+  const e = type === 'tv' ? episode || 1 : null;
+
+  try {
+    const rawDownloads = await Promise.race([
+      vylaInstance.getDownloads(tmdbId, s, e),
+      new Promise<any[]>((_, reject) =>
+        setTimeout(() => reject(new Error('Downloads timeout')), 8000)
+      ),
+    ]).catch(() => []);
+
+    return (rawDownloads || [])
+      .filter((dl: any) => dl?.url)
+      .map((dl: any, idx: number) => ({
+        id: `dl-${idx}`,
+        source: dl.source || dl.server || 'Vyla Edge',
+        label: dl.label || `${dl.quality || '1080p'} Direct Download`,
+        quality: dl.quality || '1080p',
+        size: dl.size || null,
+        url: dl.url,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export function getVylaSourcesList() {
+  try {
+    const sources = vylaInstance.getSources(true);
+    return sources.map((s) => ({
+      id: s.key,
+      name: s.label,
+      timeout: s.timeout,
+      multiUrl: s.multiUrl,
+      skipProxy: Boolean(s.skipProxy),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function probeVylaHealth() {
+  try {
+    return await vylaInstance.probeAllSources();
+  } catch (err: any) {
+    return { error: String(err?.message || err) };
+  }
+}

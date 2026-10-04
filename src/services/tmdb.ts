@@ -123,12 +123,35 @@ export const tmdbService = {
     return CURATED_TV_SHOWS.filter((s) => s.isNew || s.status === 'Returning Series');
   },
 
-  async getNewEpisodes(): Promise<TMDBEpisode[]> {
-    const apiData = await fetchFromApi<{ results: TMDBEpisode[] }>('/tv/new_episodes');
+  async getNewEpisodes(page: number = 1): Promise<TMDBEpisode[]> {
+    const apiData = await fetchFromApi<{ results: TMDBEpisode[] }>(`/tv/new_episodes?page=${page}`);
     if (apiData && apiData.results?.length > 0) {
       return apiData.results;
     }
     return CURATED_EPISODES;
+  },
+
+  async getNewEpisodesPaginated(
+    page: number = 1
+  ): Promise<{ results: TMDBEpisode[]; totalPages: number; totalResults: number }> {
+    const apiData = await fetchFromApi<{
+      results: TMDBEpisode[];
+      total_pages?: number;
+      total_results?: number;
+    }>(`/tv/new_episodes?page=${page}`);
+
+    if (apiData && apiData.results?.length > 0) {
+      return {
+        results: apiData.results,
+        totalPages: apiData.total_pages || 10,
+        totalResults: apiData.total_results || 100,
+      };
+    }
+    return {
+      results: CURATED_EPISODES,
+      totalPages: 1,
+      totalResults: CURATED_EPISODES.length,
+    };
   },
 
   async getByGenre(genreId: number, type: 'movie' | 'tv' = 'movie'): Promise<MediaItem[]> {

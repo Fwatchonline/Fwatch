@@ -32,6 +32,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { StreamResult, SubtitleTrack, AudioTrack } from '../types';
+import { fetchVylaSubtitles } from '../services/streaming';
 import { useWatchProgress } from '../hooks/useWatchProgress';
 
 interface PlayerProps {
@@ -160,6 +161,40 @@ export function Player({
 
   const [subtitles, setSubtitles] = useState<SubtitleItem[]>(initialSubtitles);
   const [selectedSubtitleId, setSelectedSubtitleId] = useState<string>('off');
+
+  // Load comprehensive multi-language subtitles from Vyla SDK
+  useEffect(() => {
+    let mounted = true;
+    fetchVylaSubtitles(tmdbId, type, seasonNumber, episodeNumber)
+      .then((vylaSubs) => {
+        if (!mounted || !vylaSubs || vylaSubs.length === 0) return;
+        setSubtitles((prev) => {
+          const existingUrls = new Set(prev.map((s) => s.url));
+          const newSubs: SubtitleItem[] = vylaSubs
+            .filter((s) => s.url && !existingUrls.has(s.url))
+            .map((s) => ({
+              id: s.id,
+              label: s.label,
+              language: s.language,
+              url: s.url,
+            }));
+          if (newSubs.length === 0) return prev;
+          const combined = [...prev, ...newSubs];
+          combined.sort((a, b) => {
+            const aIsEng = a.language.toLowerCase().startsWith('en') || a.label.toLowerCase().includes('english');
+            const bIsEng = b.language.toLowerCase().startsWith('en') || b.label.toLowerCase().includes('english');
+            if (aIsEng && !bIsEng) return -1;
+            if (!aIsEng && bIsEng) return 1;
+            return a.label.localeCompare(b.label);
+          });
+          return combined;
+        });
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, [tmdbId, type, seasonNumber, episodeNumber]);
 
   // UI Modals & Menus
   const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTab | null>(null);

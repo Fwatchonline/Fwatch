@@ -8,6 +8,7 @@ import {
   Plus,
   ChevronRight,
   Film,
+  Download,
 } from 'lucide-react';
 import { tmdbService } from '../services/tmdb';
 import { MediaItem, StreamResult, StreamingProvider } from '../types';
@@ -18,6 +19,7 @@ import { ServerSelector } from '../components/ServerSelector';
 import { SEO } from '../components/SEO';
 import { ShareModal } from '../components/ShareModal';
 import { ReportModal } from '../components/ReportModal';
+import { DownloadModal } from '../components/DownloadModal';
 import { useWatchlist } from '../hooks/useWatchlist';
 
 export function WatchMovie() {
@@ -32,6 +34,7 @@ export function WatchMovie() {
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
   const [cinemaMode, setCinemaMode] = useState(false);
   const [likesCount, setLikesCount] = useState(2450);
   const [liked, setLiked] = useState(false);
@@ -177,10 +180,20 @@ export function WatchMovie() {
                 <button
                   type="button"
                   onClick={() => setShareOpen(true)}
-                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white transition-colors"
+                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white transition-colors cursor-pointer"
                   title="Share"
                 >
                   <Share2 className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDownloadOpen(true)}
+                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-[#F5C518] transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                  title="Download Video via Vyla SDK"
+                >
+                  <Download className="w-4 h-4 text-[#F5C518]" />
+                  <span>Download</span>
                 </button>
 
                 <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F5C518] text-black text-xs font-black">
@@ -273,6 +286,16 @@ export function WatchMovie() {
           onClose={() => setReportOpen(false)}
           title={movie.title}
           serverId={currentServer.id}
+        />
+      )}
+
+      {downloadOpen && (
+        <DownloadModal
+          isOpen={downloadOpen}
+          onClose={() => setDownloadOpen(false)}
+          title={movie.title}
+          tmdbId={movie.tmdbId}
+          type="movie"
         />
       )}
     </div>

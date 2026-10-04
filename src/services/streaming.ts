@@ -395,3 +395,68 @@ export async function getBestWorkingServer(
 
   return STREAMING_SERVERS[0];
 }
+
+export interface VylaDownloadItem {
+  id: string;
+  source: string;
+  label: string;
+  quality: string;
+  size: number | null;
+  url: string;
+}
+
+export async function fetchVylaDownloads(
+  tmdbId: number,
+  type: 'movie' | 'tv',
+  season?: number,
+  episode?: number
+): Promise<VylaDownloadItem[]> {
+  const q = new URLSearchParams({
+    id: String(tmdbId),
+    type,
+    ...(season ? { season: String(season) } : {}),
+    ...(episode ? { episode: String(episode) } : {}),
+  });
+
+  const apiPath = `/api/vyla/downloads?${q.toString()}`;
+  const fetchUrl = typeof window !== 'undefined' ? apiPath : `http://localhost:${process.env.PORT || 3000}${apiPath}`;
+  try {
+    const res = await fetch(fetchUrl);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.downloads || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchVylaSubtitles(
+  tmdbId: number,
+  type: 'movie' | 'tv',
+  season?: number,
+  episode?: number
+): Promise<SubtitleTrack[]> {
+  const q = new URLSearchParams({
+    id: String(tmdbId),
+    type,
+    ...(season ? { season: String(season) } : {}),
+    ...(episode ? { episode: String(episode) } : {}),
+  });
+
+  const apiPath = `/api/vyla/subtitles?${q.toString()}`;
+  const fetchUrl = typeof window !== 'undefined' ? apiPath : `http://localhost:${process.env.PORT || 3000}${apiPath}`;
+  try {
+    const res = await fetch(fetchUrl);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.subtitles || []).map((s: any, idx: number) => ({
+      id: s.id || `vyla-sub-${idx}`,
+      label: s.label || s.language || `Subtitle ${idx + 1}`,
+      language: s.language || 'en',
+      url: s.url,
+      isDefault: idx === 0,
+    }));
+  } catch {
+    return [];
+  }
+}

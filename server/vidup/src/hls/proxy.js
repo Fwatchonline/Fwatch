@@ -92,8 +92,14 @@ export async function proxyHls(rawTargetUrl, query = {}) {
   }
 
   // 2. Query overrides
-  const ref = query.referer || customHeaders.Referer || customHeaders.referer || ''
-  const orig = query.origin || customHeaders.Origin || customHeaders.origin || ''
+  let ref = query.referer || customHeaders.Referer || customHeaders.referer || ''
+  let orig = query.origin || customHeaders.Origin || customHeaders.origin || ''
+
+  // Automatic referer for known edge CDNs
+  if (!ref && (targetUrl.includes('rousav.tech') || targetUrl.includes('valhallastream') || targetUrl.includes('animecurx.tech'))) {
+    ref = 'https://bingr.one/'
+    orig = 'https://bingr.one'
+  }
 
   let requestHeaders = {
     'User-Agent': USER_AGENT,
@@ -114,6 +120,31 @@ export async function proxyHls(rawTargetUrl, query = {}) {
 
   const res = await fetch(targetUrl, { headers: requestHeaders, redirect: 'follow' })
   if (!res.ok) {
+    // If it is an optional subtitle or audio track playlist returning 404 or 403 upstream, return empty valid playlist
+    const path = new URL(targetUrl).pathname.toLowerCase()
+    if ((res.status === 404 || res.status === 403) && (path.endsWith('.m3u8') || path.endsWith('.vtt') || path.includes('/subtitles_') || path.includes('/track_'))) {
+      if (path.endsWith('.vtt')) {
+        return {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/vtt; charset=utf-8',
+            'Cache-Control': 'public, max-age=300',
+            'Access-Control-Allow-Origin': '*',
+          },
+          body: 'WEBVTT\n\n',
+        }
+      }
+      return {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.apple.mpegurl',
+          'Cache-Control': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:1\n#EXT-X-ENDLIST\n',
+      }
+    }
+
     const body = await res.text().catch(() => '')
     throw new Error(`upstream ${res.status}${body ? `: ${body.slice(0, 80)}` : ''}`)
   }

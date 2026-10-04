@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // TMDB credentials from environment
-const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
+const TMDB_API_KEY = process.env.TMDB_API_KEY || '4e44d9029b1270a757cddc766a1bcb63';
 const TMDB_READ_ACCESS_TOKEN = process.env.TMDB_READ_ACCESS_TOKEN || '';
 const APP_URL = process.env.APP_URL || `http://localhost:${PORT}`;
 
@@ -496,9 +496,83 @@ app.get('/api/tmdb/:type/on_the_air', async (req: Request, res: Response) => {
   });
 });
 
-// New Episodes
-app.get('/api/tmdb/tv/new_episodes', async (_req: Request, res: Response) => {
-  return res.json({ results: CURATED_EPISODES });
+// New Episodes - fetched live from TMDB /tv/on_the_air & /tv/airing_today
+app.get('/api/tmdb/tv/new_episodes', async (req: Request, res: Response) => {
+  const page = String(req.query.page || '1');
+  const cacheKey = `new_episodes_v2_p${page}`;
+  const cached = serverCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    return res.json(cached.data);
+  }
+
+  try {
+    const raw = await tmdbFetch('/tv/on_the_air', { page });
+    if (raw && raw.results && raw.results.length > 0) {
+      const shows = raw.results.slice(0, 16);
+      const episodePromises = shows.map(async (s: any) => {
+        try {
+          const showDetails = await tmdbFetch(`/tv/${s.id}`, {});
+          const ep = showDetails?.last_episode_to_air;
+          if (!ep) {
+            return {
+              id: `tv:${s.id}:s1:e1`,
+              tmdbId: s.id * 100 + 1,
+              showTmdbId: s.id,
+              showTitle: s.name,
+              showSlug: generateMediaSlug(s.id, s.name),
+              seasonNumber: 1,
+              episodeNumber: 1,
+              name: `${s.name} - Latest Episode`,
+              overview: s.overview || 'Fresh episode from current broadcast season.',
+              stillPath: s.backdrop_path || null,
+              airDate: s.first_air_date || new Date().toISOString().split('T')[0],
+              voteAverage: Number(s.vote_average || 8.0),
+              runtime: 45,
+            };
+          }
+
+          return {
+            id: `tv:${s.id}:s${ep.season_number}:e${ep.episode_number}`,
+            tmdbId: ep.id,
+            showTmdbId: s.id,
+            showTitle: s.name,
+            showSlug: generateMediaSlug(s.id, s.name),
+            seasonNumber: ep.season_number,
+            episodeNumber: ep.episode_number,
+            name: ep.name || `Episode ${ep.episode_number}`,
+            overview: ep.overview || s.overview || 'Fresh episode from current broadcast season.',
+            stillPath: ep.still_path || s.backdrop_path || null,
+            airDate: ep.air_date || new Date().toISOString().split('T')[0],
+            voteAverage: Number(ep.vote_average || s.vote_average || 8.0),
+            runtime: ep.runtime || 45,
+          };
+        } catch {
+          return null;
+        }
+      });
+
+      const episodes = (await Promise.all(episodePromises)).filter(Boolean);
+      if (episodes.length > 0) {
+        const payload = {
+          results: episodes,
+          page: Number(page),
+          total_pages: Math.min(raw.total_pages || 10, 10),
+          total_results: raw.total_results || 100,
+        };
+        serverCache.set(cacheKey, { data: payload, expiry: Date.now() + CACHE_TTL_MS });
+        return res.json(payload);
+      }
+    }
+  } catch (e) {
+    console.warn('[new_episodes error]', e);
+  }
+
+  return res.json({
+    results: CURATED_EPISODES,
+    page: 1,
+    total_pages: 1,
+    total_results: CURATED_EPISODES.length,
+  });
 });
 
 // Movie Details
@@ -795,12 +869,12 @@ app.get('/api/hls', async (req: Request, res: Response) => {
   }
   try {
     const { proxyHls } = await import('./server/vidup/src/hls/proxy.js');
-    const proxied = await proxyHls(target);
+    const proxied = await proxyHls(target, req.query as Record<string, string>);
     res.writeHead(proxied.status, proxied.headers);
     res.end(proxied.body);
   } catch (err: any) {
-    console.error('[vidup hls proxy error]', target?.slice(0, 80), err?.message);
-    res.status(502).send('upstream error');
+    console.warn('[vidup hls proxy notice]', target?.slice(0, 80), err?.message);
+    res.status(err?.message?.includes('404') ? 404 : 502).send('upstream error');
   }
 });
 
@@ -893,6 +967,59 @@ app.get('/api/stream/resolve', async (req: Request, res: Response) => {
     }
 
     res.status(404).json({ ok: false, error: 'No direct HLS stream found for this title' });
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: String(err?.message || err) });
+  }
+});
+
+// 4. Vyla SDK Multi-Language Subtitles
+app.get('/api/vyla/subtitles', async (req: Request, res: Response) => {
+  try {
+    const tmdbId = Number(req.query.id);
+    const type = req.query.type === 'tv' ? 'tv' : 'movie';
+    const season = req.query.season ? Number(req.query.season) : undefined;
+    const episode = req.query.episode ? Number(req.query.episode) : undefined;
+
+    if (!tmdbId) {
+      res.status(400).json({ error: 'id parameter is required' });
+      return;
+    }
+
+    const { getVylaSubtitles } = await import('./server/vylaSolver.ts');
+    const subtitles = await getVylaSubtitles(tmdbId, type, season, episode);
+    res.json({ ok: true, subtitles });
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: String(err?.message || err) });
+  }
+});
+
+// 5. Vyla SDK High Speed Downloads
+app.get('/api/vyla/downloads', async (req: Request, res: Response) => {
+  try {
+    const tmdbId = Number(req.query.id);
+    const type = req.query.type === 'tv' ? 'tv' : 'movie';
+    const season = req.query.season ? Number(req.query.season) : undefined;
+    const episode = req.query.episode ? Number(req.query.episode) : undefined;
+
+    if (!tmdbId) {
+      res.status(400).json({ error: 'id parameter is required' });
+      return;
+    }
+
+    const { getVylaDownloads } = await import('./server/vylaSolver.ts');
+    const downloads = await getVylaDownloads(tmdbId, type, season, episode);
+    res.json({ ok: true, downloads });
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: String(err?.message || err) });
+  }
+});
+
+// 6. Vyla SDK Sources & Status
+app.get('/api/vyla/sources', async (_req: Request, res: Response) => {
+  try {
+    const { getVylaSourcesList } = await import('./server/vylaSolver.ts');
+    const sources = getVylaSourcesList();
+    res.json({ ok: true, sources });
   } catch (err: any) {
     res.status(500).json({ ok: false, error: String(err?.message || err) });
   }

@@ -12,6 +12,7 @@ import {
   Grid,
   X,
   Clock,
+  Download,
 } from 'lucide-react';
 import { tmdbService } from '../services/tmdb';
 import { MediaItem, TMDBEpisode, TMDBSeason, StreamResult, StreamingProvider } from '../types';
@@ -22,6 +23,7 @@ import { ServerSelector } from '../components/ServerSelector';
 import { SEO } from '../components/SEO';
 import { ShareModal } from '../components/ShareModal';
 import { ReportModal } from '../components/ReportModal';
+import { DownloadModal } from '../components/DownloadModal';
 import { useWatchlist } from '../hooks/useWatchlist';
 
 export function WatchEpisode() {
@@ -48,6 +50,7 @@ export function WatchEpisode() {
   const [episodesLoading, setEpisodesLoading] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
   const [allEpisodesModalOpen, setAllEpisodesModalOpen] = useState(false);
   const [cinemaMode, setCinemaMode] = useState(false);
   const [storyExpanded, setStoryExpanded] = useState(false);
@@ -285,10 +288,20 @@ export function WatchEpisode() {
                 <button
                   type="button"
                   onClick={() => setShareOpen(true)}
-                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white transition-colors"
+                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white transition-colors cursor-pointer"
                   title="Share"
                 >
                   <Share2 className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDownloadOpen(true)}
+                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-[#F5C518] transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                  title="Download Episode via Vyla SDK"
+                >
+                  <Download className="w-4 h-4 text-[#F5C518]" />
+                  <span>Download</span>
                 </button>
 
                 <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F5C518] text-black text-xs font-black">
@@ -562,6 +575,18 @@ export function WatchEpisode() {
           onClose={() => setReportOpen(false)}
           title={`${episodeTitle} - ${tvShow.title}`}
           serverId={currentServer.id}
+        />
+      )}
+
+      {downloadOpen && (
+        <DownloadModal
+          isOpen={downloadOpen}
+          onClose={() => setDownloadOpen(false)}
+          title={tvShow.title}
+          tmdbId={tvShow.tmdbId}
+          type="tv"
+          season={currentSeasonNum}
+          episode={currentEpisodeNum}
         />
       )}
     </div>
