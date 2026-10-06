@@ -146,7 +146,7 @@ async function tmdbFetch(endpoint: string, params: Record<string, string> = {}, 
     return cached.data;
   }
 
-  const apiKey = env.TMDB_API_KEY || (typeof process !== 'undefined' ? process.env?.TMDB_API_KEY : '') || '4ff5a77cb540ca70b284e9089228fe00';
+  const apiKey = env.TMDB_API_KEY || (typeof process !== 'undefined' ? process.env?.TMDB_API_KEY : '') || '4e44d9029b1270a757cddc766a1bcb63';
   const readToken = env.TMDB_READ_ACCESS_TOKEN || (typeof process !== 'undefined' ? process.env?.TMDB_READ_ACCESS_TOKEN : '');
 
   const queryParams = new URLSearchParams(params);
@@ -259,7 +259,14 @@ function formatMediaItem(raw: any, type: 'movie' | 'tv') {
         id: g.id,
         name: g.name,
         slug: g.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      })) || [],
+      })) ||
+      raw.genre_ids?.map((gid: number) => {
+        const found = GENRES_LIST.find((item) => item.id === gid);
+        return found
+          ? { id: found.id, name: found.name, slug: found.slug }
+          : { id: gid, name: 'General', slug: 'general' };
+      }) ||
+      [],
     runtime: isMovie ? raw.runtime : undefined,
     numberOfSeasons: !isMovie ? raw.number_of_seasons : undefined,
     numberOfEpisodes: !isMovie ? raw.number_of_episodes : undefined,
@@ -551,22 +558,56 @@ export default {
     // 10. TMDB PROXY ROUTES
     // -------------------------------------------------------------
     if (pathname === '/api/tmdb/person/popular') {
-      const data = await tmdbFetch('/person/popular', { page: searchParams.get('page') || '1' }, env);
+      const page = searchParams.get('page') || '1';
+      const data = await tmdbFetch('/person/popular', { page }, env);
       if (data?.results) {
-        return Response.json(data.results.map(formatPerson), { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: data.results.map(formatPerson),
+            page: Number(page),
+            total_pages: Math.min(data.total_pages || 50, 50),
+            total_results: data.total_results || 1000,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
-      return Response.json(CURATED_ACTORS, { headers: CORS_HEADERS });
+      return Response.json(
+        {
+          results: CURATED_ACTORS,
+          page: 1,
+          total_pages: 1,
+          total_results: CURATED_ACTORS.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     if (pathname === '/api/tmdb/search/person') {
       const q = searchParams.get('query') || '';
-      if (!q) return Response.json([], { headers: CORS_HEADERS });
-      const data = await tmdbFetch('/search/person', { query: q, page: searchParams.get('page') || '1' }, env);
+      const page = searchParams.get('page') || '1';
+      if (!q) return Response.json({ results: [], page: 1, total_pages: 1, total_results: 0 }, { headers: CORS_HEADERS });
+      const data = await tmdbFetch('/search/person', { query: q, page }, env);
       if (data?.results) {
-        return Response.json(data.results.map(formatPerson), { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: data.results.map(formatPerson),
+            page: Number(page),
+            total_pages: Math.min(data.total_pages || 10, 10),
+            total_results: data.total_results || 100,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
       const filtered = CURATED_ACTORS.filter((a) => a.name.toLowerCase().includes(q.toLowerCase()));
-      return Response.json(filtered, { headers: CORS_HEADERS });
+      return Response.json(
+        {
+          results: filtered,
+          page: 1,
+          total_pages: 1,
+          total_results: filtered.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     const trendingMatch = pathname.match(/^\/api\/tmdb\/trending\/(all|movie|tv)\/(day|week)$/);
@@ -579,10 +620,26 @@ export default {
           formatMediaItem(item, item.media_type === 'tv' ? 'tv' : 'movie')
         );
         const enriched = await enrichWithImdbRatings(formatted, 'movie', env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: 1,
+            total_pages: 1,
+            total_results: enriched.length,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
       const fallback = type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES;
-      return Response.json(fallback, { headers: CORS_HEADERS });
+      return Response.json(
+        {
+          results: fallback,
+          page: 1,
+          total_pages: 1,
+          total_results: fallback.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     const popularMatch = pathname.match(/^\/api\/tmdb\/(movie|tv)\/popular$/);
@@ -593,9 +650,26 @@ export default {
       if (data?.results) {
         const formatted = data.results.map((item: any) => formatMediaItem(item, type));
         const enriched = await enrichWithImdbRatings(formatted, type, env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: data.page || Number(page),
+            total_pages: Math.min(data.total_pages || 50, 50),
+            total_results: data.total_results || 1000,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
-      return Response.json(type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES, { headers: CORS_HEADERS });
+      const fallback = type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES;
+      return Response.json(
+        {
+          results: fallback,
+          page: 1,
+          total_pages: 1,
+          total_results: fallback.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     const topRatedMatch = pathname.match(/^\/api\/tmdb\/(movie|tv)\/top_rated$/);
@@ -606,9 +680,26 @@ export default {
       if (data?.results) {
         const formatted = data.results.map((item: any) => formatMediaItem(item, type));
         const enriched = await enrichWithImdbRatings(formatted, type, env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: data.page || Number(page),
+            total_pages: Math.min(data.total_pages || 50, 50),
+            total_results: data.total_results || 1000,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
-      return Response.json(type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES, { headers: CORS_HEADERS });
+      const fallback = type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES;
+      return Response.json(
+        {
+          results: fallback,
+          page: 1,
+          total_pages: 1,
+          total_results: fallback.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     const nowPlayingMatch = pathname.match(/^\/api\/tmdb\/(movie|tv)\/(now_playing|on_the_air)$/);
@@ -620,9 +711,26 @@ export default {
       if (data?.results) {
         const formatted = data.results.map((item: any) => formatMediaItem(item, type));
         const enriched = await enrichWithImdbRatings(formatted, type, env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: data.page || Number(page),
+            total_pages: Math.min(data.total_pages || 50, 50),
+            total_results: data.total_results || 1000,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
-      return Response.json(type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES, { headers: CORS_HEADERS });
+      const fallback = type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES;
+      return Response.json(
+        {
+          results: fallback,
+          page: 1,
+          total_pages: 1,
+          total_results: fallback.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     if (pathname === '/api/tmdb/tv/new_episodes') {
@@ -778,9 +886,26 @@ export default {
       if (data?.results) {
         const formatted = data.results.map((item: any) => formatMediaItem(item, type));
         const enriched = await enrichWithImdbRatings(formatted, type, env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: data.page || Number(page),
+            total_pages: Math.min(data.total_pages || 50, 50),
+            total_results: data.total_results || 1000,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
-      return Response.json(type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES, { headers: CORS_HEADERS });
+      const fallback = type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES;
+      return Response.json(
+        {
+          results: fallback,
+          page: 1,
+          total_pages: 1,
+          total_results: fallback.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     const similarMatch = pathname.match(/^\/api\/tmdb\/(movie|tv)\/(\d+)\/similar$/);
@@ -791,28 +916,62 @@ export default {
       if (data?.results) {
         const formatted = data.results.map((item: any) => formatMediaItem(item, type));
         const enriched = await enrichWithImdbRatings(formatted, type, env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: 1,
+            total_pages: 1,
+            total_results: enriched.length,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
       const list = type === 'tv' ? CURATED_TV_SHOWS : CURATED_MOVIES;
-      return Response.json(list.filter((x) => String(x.tmdbId) !== id).slice(0, 6), { headers: CORS_HEADERS });
+      const filtered = list.filter((x) => String(x.tmdbId) !== id).slice(0, 6);
+      return Response.json(
+        {
+          results: filtered,
+          page: 1,
+          total_pages: 1,
+          total_results: filtered.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     if (pathname === '/api/tmdb/search/multi') {
       const q = searchParams.get('query') || '';
-      if (!q) return Response.json([], { headers: CORS_HEADERS });
-      const data = await tmdbFetch('/search/multi', { query: q, page: searchParams.get('page') || '1' }, env);
+      if (!q) return Response.json({ results: [], page: 1, total_pages: 1, total_results: 0 }, { headers: CORS_HEADERS });
+      const page = searchParams.get('page') || '1';
+      const data = await tmdbFetch('/search/multi', { query: q, page }, env);
       if (data?.results) {
         const filtered = data.results
           .filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv')
           .map((item: any) => formatMediaItem(item, item.media_type as 'movie' | 'tv'));
         const enriched = await enrichWithImdbRatings(filtered, 'movie', env);
-        return Response.json(enriched, { headers: CORS_HEADERS });
+        return Response.json(
+          {
+            results: enriched,
+            page: data.page || Number(page),
+            total_pages: Math.min(data.total_pages || 10, 10),
+            total_results: data.total_results || enriched.length,
+          },
+          { headers: CORS_HEADERS }
+        );
       }
       const term = q.toLowerCase();
       const localMatches = [...CURATED_MOVIES, ...CURATED_TV_SHOWS].filter((m) =>
         m.title.toLowerCase().includes(term)
       );
-      return Response.json(localMatches, { headers: CORS_HEADERS });
+      return Response.json(
+        {
+          results: localMatches,
+          page: 1,
+          total_pages: 1,
+          total_results: localMatches.length,
+        },
+        { headers: CORS_HEADERS }
+      );
     }
 
     const personMatch = pathname.match(/^\/api\/tmdb\/person\/(\d+)$/);

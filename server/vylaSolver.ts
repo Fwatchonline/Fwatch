@@ -21,7 +21,7 @@ let _vylaInstance: any = null;
 
 export function getVylaInstance() {
   if (!_vylaInstance) {
-    const key = process.env.TMDB_API_KEY || '4ff5a77cb540ca70b284e9089228fe00';
+    const key = process.env.TMDB_API_KEY || '4e44d9029b1270a757cddc766a1bcb63';
     _vylaInstance = new (VylaSDK as any)({ tmdbApiKey: key });
   }
   return _vylaInstance;

@@ -18,7 +18,16 @@ async function fetchFromApi<T>(endpoint: string): Promise<T | null> {
     if (!res.ok) {
       return null;
     }
-    const data = await res.json();
+    let data = await res.json();
+    // Normalize array responses so callers expecting { results: [...] } always succeed
+    if (Array.isArray(data)) {
+      data = {
+        results: data,
+        page: 1,
+        total_pages: 1,
+        total_results: data.length,
+      } as any;
+    }
     clientCache.set(cacheKey, { data, expiry: Date.now() + CACHE_TTL_MS });
     return data as T;
   } catch {
