@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
+    "build:client": "vite build",
     "build:worker": "vite build && wrangler deploy --dry-run --outdir dist-worker",
+    "workers:deploy": "wrangler deploy",
     "deploy": "vite build && wrangler deploy",
     "preview:worker": "wrangler dev",
     "start": "tsx server.ts",
-    "postinstall": "node scripts/patch-vyla.js",
+    "postinstall": "node scripts/patch-vyla.js || true",
     "clean": "rm -rf dist dist-worker",
     "lint": "tsc --noEmit"
   },
