@@ -17,8 +17,15 @@ export interface VylaStreamResult {
   error?: string;
 }
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY || '4ff5a77cb540ca70b284e9089228fe00';
-const vylaInstance = new VylaSDK({ tmdbApiKey: TMDB_API_KEY });
+let _vylaInstance: any = null;
+
+export function getVylaInstance() {
+  if (!_vylaInstance) {
+    const key = process.env.TMDB_API_KEY || '4ff5a77cb540ca70b284e9089228fe00';
+    _vylaInstance = new (VylaSDK as any)({ tmdbApiKey: key });
+  }
+  return _vylaInstance;
+}
 
 const STREAM_CACHE = new Map<string, { data: VylaStreamResult; expires: number }>();
 const SUBTITLES_CACHE = new Map<string, { data: any[]; expires: number }>();
@@ -81,7 +88,7 @@ export async function resolveVylaHls(
     rawSubs = cachedSubs.data;
   } else {
     try {
-      rawSubs = await vylaInstance.getSubtitles(tmdbId, s, e).catch(() => []);
+      rawSubs = await getVylaInstance().getSubtitles(tmdbId, s, e).catch(() => []);
       SUBTITLES_CACHE.set(subKey, { data: rawSubs, expires: Date.now() + CACHE_TTL });
     } catch {
       rawSubs = [];
@@ -107,7 +114,7 @@ export async function resolveVylaHls(
   for (const providerKey of providerCandidates) {
     try {
       const streamRes = await Promise.race([
-        vylaInstance.getStream(providerKey, tmdbId, s, e),
+        getVylaInstance().getStream(providerKey, tmdbId, s, e),
         new Promise<null>((_, reject) =>
           setTimeout(() => reject(new Error('Provider timeout')), 7000)
         ),
@@ -205,7 +212,7 @@ export async function getVylaSubtitles(
 
   try {
     const rawSubs = await Promise.race([
-      vylaInstance.getSubtitles(tmdbId, s, e),
+      getVylaInstance().getSubtitles(tmdbId, s, e),
       new Promise<any[]>((_, reject) =>
         setTimeout(() => reject(new Error('Subtitles timeout')), 8000)
       ),
@@ -246,7 +253,7 @@ export async function getVylaDownloads(
 
   try {
     const rawDownloads = await Promise.race([
-      vylaInstance.getDownloads(tmdbId, s, e),
+      getVylaInstance().getDownloads(tmdbId, s, e),
       new Promise<any[]>((_, reject) =>
         setTimeout(() => reject(new Error('Downloads timeout')), 8000)
       ),
@@ -269,8 +276,8 @@ export async function getVylaDownloads(
 
 export function getVylaSourcesList() {
   try {
-    const sources = vylaInstance.getSources(true);
-    return sources.map((s) => ({
+    const sources = getVylaInstance().getSources(true);
+    return sources.map((s: any) => ({
       id: s.key,
       name: s.label,
       timeout: s.timeout,
@@ -284,7 +291,7 @@ export function getVylaSourcesList() {
 
 export async function probeVylaHealth() {
   try {
-    return await vylaInstance.probeAllSources();
+    return await getVylaInstance().probeAllSources();
   } catch (err: any) {
     return { error: String(err?.message || err) };
   }
