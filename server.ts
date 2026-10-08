@@ -324,8 +324,13 @@ function formatPersonItem(raw: any) {
 }
 
 // -------------------------------------------------------------
-// TMDB API PROXY ROUTES
+// TMDB API PROXY ROUTES & HEALTH
 // -------------------------------------------------------------
+
+// Health check endpoint
+app.get('/api/health', (_req: Request, res: Response) => {
+  return res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+});
 
 // Popular Actors from TMDB with pagination
 app.get('/api/tmdb/person/popular', async (req: Request, res: Response) => {

@@ -1,29 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import {
-  ThumbsUp,
-  ThumbsDown,
-  Share2,
-  Star,
-  Plus,
-  ChevronRight,
-  ChevronLeft,
-  Play,
-  Grid,
-  X,
-  Clock,
-  Download,
-} from 'lucide-react';
 import { tmdbService } from '../services/tmdb';
 import { MediaItem, TMDBEpisode, TMDBSeason, StreamResult, StreamingProvider } from '../types';
 import { getBestWorkingServer, STREAMING_SERVERS, setPreferredServerId } from '../services/streaming';
-import { getTMDBImageUrl } from '../utils/slugify';
 import { Player } from '../components/Player';
 import { ServerSelector } from '../components/ServerSelector';
 import { SEO } from '../components/SEO';
 import { ShareModal } from '../components/ShareModal';
 import { ReportModal } from '../components/ReportModal';
 import { DownloadModal } from '../components/DownloadModal';
+import { MovieInfoPanel } from '../components/watch/MovieInfoPanel';
+import { StorylineSection } from '../components/watch/StorylineSection';
+import { CastCarousel } from '../components/watch/CastCarousel';
+import { EpisodeSelector } from '../components/watch/EpisodeSelector';
+import { RecommendedSidebar } from '../components/watch/RecommendedSidebar';
 import { useWatchlist } from '../hooks/useWatchlist';
 
 export function WatchEpisode() {
@@ -41,28 +31,21 @@ export function WatchEpisode() {
 
   const [tvShow, setTvShow] = useState<MediaItem | null>(null);
   const [episode, setEpisode] = useState<TMDBEpisode | null>(null);
-  const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number>(currentSeasonNum);
   const [season, setSeason] = useState<TMDBSeason | null>(null);
+  const [similar, setSimilar] = useState<MediaItem[]>([]);
   const [streamResult, setStreamResult] = useState<StreamResult | null>(null);
   const [currentServer, setCurrentServer] = useState<StreamingProvider>(STREAMING_SERVERS[0]);
   const [failedServerIds, setFailedServerIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [episodesLoading, setEpisodesLoading] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
-  const [allEpisodesModalOpen, setAllEpisodesModalOpen] = useState(false);
   const [cinemaMode, setCinemaMode] = useState(false);
-  const [storyExpanded, setStoryExpanded] = useState(false);
-  const [likesCount, setLikesCount] = useState(1420);
+  const [autoNext, setAutoNext] = useState(true);
+  const [likesCount, setLikesCount] = useState(1890);
   const [liked, setLiked] = useState(false);
 
-  // Sync selected season with URL
-  useEffect(() => {
-    setSelectedSeasonNumber(currentSeasonNum);
-  }, [currentSeasonNum]);
-
-  // Load TV show, current episode and stream
+  // Load TV show, current episode, season and stream
   useEffect(() => {
     let mounted = true;
     if (!slug) return;
@@ -73,6 +56,10 @@ export function WatchEpisode() {
       setTvShow(resolvedShow);
 
       if (resolvedShow) {
+        tmdbService.getSimilar('tv', resolvedShow.tmdbId).then((sim) => {
+          if (mounted) setSimilar(sim);
+        });
+
         const [ep, s] = await Promise.all([
           tmdbService.getEpisode(resolvedShow.tmdbId, currentSeasonNum, currentEpisodeNum),
           tmdbService.getSeason(resolvedShow.tmdbId, currentSeasonNum),
@@ -104,14 +91,17 @@ export function WatchEpisode() {
     };
   }, [slug, currentSeasonNum, currentEpisodeNum]);
 
-  // When season changes in the dropdown
+  // When season changes in the episode selector dropdown
   const handleSeasonSelect = async (sNum: number) => {
     if (!tvShow) return;
-    setSelectedSeasonNumber(sNum);
-    setEpisodesLoading(true);
     const s = await tmdbService.getSeason(tvShow.tmdbId, sNum);
     setSeason(s);
-    setEpisodesLoading(false);
+    navigate(`/watch/tv/${tvShow.slug}/season/${sNum}/episode/1`);
+  };
+
+  const handleEpisodeSelect = (epNum: number) => {
+    if (!tvShow) return;
+    navigate(`/watch/tv/${tvShow.slug}/season/${currentSeasonNum}/episode/${epNum}`);
   };
 
   const handleSelectServer = async (server: StreamingProvider) => {
@@ -132,7 +122,8 @@ export function WatchEpisode() {
   };
 
   const episodesList = season?.episodes || [];
-  const hasNextEpisode = episodesList.some((e) => e.episodeNumber === currentEpisodeNum + 1) || true;
+  const maxEpisodes = episodesList.length > 0 ? episodesList.length : 24;
+  const hasNextEpisode = currentEpisodeNum < maxEpisodes;
   const hasPrevEpisode = currentEpisodeNum > 1;
 
   const handleNextEpisode = () => {
@@ -145,20 +136,35 @@ export function WatchEpisode() {
     navigate(`/watch/tv/${tvShow.slug}/season/${currentSeasonNum}/episode/${currentEpisodeNum - 1}`);
   };
 
+  const handleToggleLike = () => {
+    setLiked(!liked);
+    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin shadow-lg shadow-[#F5C518]/20" />
+        <p className="text-sm font-semibold text-[#A1A7B5] animate-pulse">Loading episode stream...</p>
       </div>
     );
   }
 
   if (!tvShow) {
     return (
-      <div className="text-center py-20">
+      <div className="text-center py-24 max-w-md mx-auto">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#111318] border border-white/10 flex items-center justify-center text-2xl font-black text-[#F5C518]">
+          !
+        </div>
         <h2 className="text-2xl font-bold text-white mb-2">Series Not Found</h2>
-        <Link to="/tv" className="text-[#F5C518] font-semibold hover:underline">
-          Return to Series
+        <p className="text-sm text-[#A1A7B5] mb-6">
+          We couldn't find the requested series. It may have been moved or removed.
+        </p>
+        <Link
+          to="/tv"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#F5C518] hover:bg-[#FFD633] text-black font-extrabold text-sm transition-all shadow-lg shadow-[#F5C518]/25"
+        >
+          Explore All TV Series
         </Link>
       </div>
     );
@@ -167,402 +173,120 @@ export function WatchEpisode() {
   const isSaved = isInWatchlist(tvShow.tmdbId, 'tv');
   const episodeTitle = episode?.name || `Episode ${currentEpisodeNum}`;
   const totalSeasons = tvShow.numberOfSeasons || 1;
-  const seasonsList = Array.from({ length: totalSeasons }, (_, i) => i + 1);
 
   return (
-    <div className="space-y-8 py-2">
+    <div className="relative py-2 space-y-6">
       <SEO
         title={`${episodeTitle} - ${tvShow.title} - T.Movie`}
-        description={episode?.overview || tvShow.overview || 'Watch episode online.'}
+        description={episode?.overview || tvShow.overview || 'Watch TV episode online in HD.'}
       />
 
-      {/* Main Grid: Left Column (Player & Details), Right Column (Episodes List) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (Player, Controls & Details) */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+      {/* Cinema Mode Dimming Overlay */}
+      {cinemaMode && (
+        <div
+          onClick={() => setCinemaMode(false)}
+          className="fixed inset-0 bg-black/90 backdrop-blur-md z-40 transition-opacity duration-500 cursor-pointer"
+          title="Click to exit Cinema Mode"
+        />
+      )}
+
+      {/* Main Grid: Left (Player & Details), Right (Sidebar) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Player, Episode Selector, Metadata, Cast */}
+        <div
+          className={`space-y-6 transition-all duration-300 ${
+            cinemaMode
+              ? 'lg:col-span-12 relative z-50 max-w-6xl mx-auto w-full'
+              : 'lg:col-span-8 xl:col-span-9'
+          }`}
+        >
           {/* Direct HLS Video Player */}
           {streamResult && (
-            <Player
-              streamResult={streamResult}
-              title={tvShow.title}
-              episodeName={episodeTitle}
-              tmdbId={tvShow.tmdbId}
-              type="tv"
-              slug={tvShow.slug}
-              posterPath={tvShow.posterPath}
-              backdropPath={tvShow.backdropPath}
-              seasonNumber={currentSeasonNum}
-              episodeNumber={currentEpisodeNum}
-              onNextEpisode={handleNextEpisode}
-              cinemaMode={cinemaMode}
-              onToggleCinemaMode={() => setCinemaMode(!cinemaMode)}
-              onShare={() => setShareOpen(true)}
-              onReportIssue={() => setReportOpen(true)}
-            />
+            <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/[0.08] bg-black">
+              <Player
+                streamResult={streamResult}
+                title={tvShow.title}
+                episodeName={episodeTitle}
+                tmdbId={tvShow.tmdbId}
+                type="tv"
+                slug={tvShow.slug}
+                posterPath={tvShow.posterPath}
+                backdropPath={tvShow.backdropPath}
+                seasonNumber={currentSeasonNum}
+                episodeNumber={currentEpisodeNum}
+                onPrevEpisode={hasPrevEpisode ? handlePrevEpisode : undefined}
+                onNextEpisode={hasNextEpisode ? handleNextEpisode : undefined}
+                cinemaMode={cinemaMode}
+                onToggleCinemaMode={() => setCinemaMode(!cinemaMode)}
+                onShare={() => setShareOpen(true)}
+                onReportIssue={() => setReportOpen(true)}
+              />
+            </div>
           )}
 
-          {/* Episode Quick Navigation Bar (Previous Episode / Next Episode) */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#16171E] border border-white/5">
-            <button
-              type="button"
-              onClick={handlePrevEpisode}
-              disabled={!hasPrevEpisode}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                hasPrevEpisode
-                  ? 'bg-[#0E0F12] hover:bg-[#F5C518] text-white hover:text-black border border-white/10 cursor-pointer'
-                  : 'bg-[#0E0F12]/50 text-neutral-600 border border-white/5 cursor-not-allowed'
-              }`}
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Previous Episode</span>
-            </button>
+          {/* Episode Quick Selector Bar (Seasons, Episodes Modal, Prev/Next, Auto-Next) */}
+          <EpisodeSelector
+            currentSeasonNumber={currentSeasonNum}
+            currentEpisodeNumber={currentEpisodeNum}
+            season={season}
+            totalSeasons={totalSeasons}
+            onSelectSeason={handleSeasonSelect}
+            onSelectEpisode={handleEpisodeSelect}
+            onPrevEpisode={handlePrevEpisode}
+            onNextEpisode={handleNextEpisode}
+            hasPrevEpisode={hasPrevEpisode}
+            hasNextEpisode={hasNextEpisode}
+            autoNext={autoNext}
+            onToggleAutoNext={() => setAutoNext(!autoNext)}
+          />
 
-            <span className="text-xs font-black text-[#F5C518] px-3 py-1 rounded-lg bg-black/40 border border-[#F5C518]/20">
-              S{String(currentSeasonNum).padStart(2, '0')} • E{String(currentEpisodeNum).padStart(2, '0')}
-            </span>
-
-            <button
-              type="button"
-              onClick={handleNextEpisode}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#F5C518] hover:bg-[#E5B508] text-black transition-all cursor-pointer shadow-md shadow-[#F5C518]/20"
-            >
-              <span>Next Episode</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Under-Player Metadata & Actions */}
-          <div className="rounded-3xl bg-[#16171E] border border-white/5 p-6 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-white">
-                  {episodeTitle}{' '}
-                  <span className="text-neutral-400 font-semibold text-sm">
-                    (Season {currentSeasonNum}, Episode {currentEpisodeNum})
-                  </span>
-                </h1>
-
-                {/* Show chip */}
-                <Link
-                  to={`/tv/${tvShow.slug}`}
-                  className="flex items-center gap-2 mt-2 group w-fit"
-                >
-                  <img
-                    src={getTMDBImageUrl(tvShow.posterPath, 'w300')}
-                    alt={tvShow.title}
-                    className="w-7 h-7 rounded-full object-cover border border-[#F5C518]"
-                  />
-                  <span className="text-xs font-bold text-neutral-300 group-hover:text-[#F5C518] transition-colors">
-                    {tvShow.title}
-                  </span>
-                </Link>
-              </div>
-
-              {/* Action Buttons: Like, Dislike, Share, Rating, Add to Watchlist */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLiked(!liked);
-                    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
-                  }}
-                  className={`p-2.5 rounded-xl border transition-colors flex items-center gap-1.5 text-xs font-bold ${
-                    liked
-                      ? 'bg-[#F5C518] border-[#F5C518] text-black'
-                      : 'bg-[#0E0F12] border-white/10 hover:border-white/20 text-neutral-300'
-                  }`}
-                  title="Like"
-                >
-                  <ThumbsUp className="w-4 h-4" />
-                  <span>{likesCount}</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white transition-colors"
-                  title="Dislike"
-                >
-                  <ThumbsDown className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShareOpen(true)}
-                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white transition-colors cursor-pointer"
-                  title="Share"
-                >
-                  <Share2 className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setDownloadOpen(true)}
-                  className="p-2.5 rounded-xl bg-[#0E0F12] border border-white/10 hover:border-white/20 text-neutral-300 hover:text-[#F5C518] transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
-                  title="Download Episode via Vyla SDK"
-                >
-                  <Download className="w-4 h-4 text-[#F5C518]" />
-                  <span>Download</span>
-                </button>
-
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#F5C518] text-black text-xs font-black">
-                  <span>IMDb</span>
-                  <span>{episode?.imdbRating ? Number(episode.imdbRating).toFixed(1) : (episode?.voteAverage ? episode.voteAverage.toFixed(1) : '9.0')}</span>
-                  <Star className="w-3.5 h-3.5 fill-black" />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => toggleWatchlist(tvShow)}
-                  className="py-2.5 px-4 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-extrabold transition-colors flex items-center gap-1.5 shadow-md shadow-[#F5C518]/20 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>{isSaved ? 'In Watchlist' : 'Add to Watchlist'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Story Line */}
-            <div className="pt-2 border-t border-white/5">
-              <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">
-                Story line:
-              </h4>
-              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                {episode?.overview ||
-                  tvShow.overview ||
-                  'Dramatic conflicts unfold as characters navigate alliances, peril, and unforeseen twists in this episode.'}
-                {!storyExpanded && (
-                  <button
-                    type="button"
-                    onClick={() => setStoryExpanded(true)}
-                    className="text-[#F5C518] font-bold ml-1.5 hover:underline"
-                  >
-                    ... Read More
-                  </button>
-                )}
-              </p>
-            </div>
-          </div>
-
-          {/* Multi-Server Fallback Selector */}
+          {/* Streaming Server Selector */}
           <ServerSelector
             currentServerId={currentServer.id}
             onSelectServer={handleSelectServer}
             failedServerIds={failedServerIds}
           />
-        </div>
 
-        {/* Right Column: Episodes Playlist & Season Selector */}
-        <div className="lg:col-span-4 xl:col-span-3 rounded-3xl bg-[#16171E] border border-white/5 p-5 shadow-2xl h-fit space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
-            <h3 className="font-extrabold text-base text-white">Episodes</h3>
+          {/* Comprehensive TV Episode Info Panel with Poster, Season/Ep, Runtime, IMDb, Actions */}
+          <MovieInfoPanel
+            item={tvShow}
+            type="tv"
+            episode={episode}
+            seasonNumber={currentSeasonNum}
+            episodeNumber={currentEpisodeNum}
+            liked={liked}
+            likesCount={likesCount}
+            onToggleLike={handleToggleLike}
+            isSaved={isSaved}
+            onToggleWatchlist={() => toggleWatchlist(tvShow)}
+            onShare={() => setShareOpen(true)}
+            onDownload={() => setDownloadOpen(true)}
+          />
 
-            {/* Season Selector Dropdown */}
-            <select
-              value={selectedSeasonNumber}
-              onChange={(e) => handleSeasonSelect(Number(e.target.value))}
-              className="py-1 px-3 rounded-xl bg-[#0E0F12] border border-white/10 text-xs font-bold text-[#F5C518] outline-hidden cursor-pointer focus:border-[#F5C518]"
-            >
-              {seasonsList.map((num) => (
-                <option key={num} value={num} className="bg-[#16171E] text-white">
-                  Season {num}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Expandable Storyline Section */}
+          <StorylineSection
+            overview={episode?.overview || tvShow.overview}
+            tagline={tvShow.tagline}
+          />
 
-          {/* Quick All-Episodes Grid Trigger */}
-          <button
-            type="button"
-            onClick={() => setAllEpisodesModalOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-[#0E0F12] hover:bg-white/5 border border-white/10 text-xs font-bold text-neutral-300 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Grid className="w-3.5 h-3.5 text-[#F5C518]" />
-            <span>Open All Episodes Grid ({episodesList.length})</span>
-          </button>
-
-          {/* Episodes Playlist (Scrollable, full season list) */}
-          {episodesLoading ? (
-            <div className="py-12 text-center">
-              <div className="w-6 h-6 border-2 border-[#F5C518] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <span className="text-[11px] text-neutral-400">Loading episodes...</span>
-            </div>
-          ) : (
-            <div className="space-y-2.5 max-h-[720px] overflow-y-auto no-scrollbar pr-1">
-              {episodesList.map((ep) => {
-                const isActive =
-                  selectedSeasonNumber === currentSeasonNum &&
-                  ep.episodeNumber === currentEpisodeNum;
-
-                return (
-                  <Link
-                    key={ep.id}
-                    to={`/watch/tv/${tvShow.slug}/season/${selectedSeasonNumber}/episode/${ep.episodeNumber}`}
-                    className={`flex items-start gap-3 p-2.5 rounded-2xl transition-all border group ${
-                      isActive
-                        ? 'bg-[#F5C518]/15 border-[#F5C518] shadow-md shadow-[#F5C518]/10'
-                        : 'bg-[#0E0F12] border-white/5 hover:border-[#F5C518]/30'
-                    }`}
-                  >
-                    <div className="relative w-22 sm:w-24 aspect-video rounded-xl overflow-hidden shrink-0 bg-black/40">
-                      <img
-                        src={getTMDBImageUrl(ep.stillPath || tvShow.backdropPath, 'w300')}
-                        alt={ep.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80';
-                        }}
-                      />
-                      {isActive ? (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <Play className="w-5 h-5 fill-[#F5C518] text-[#F5C518]" />
-                        </div>
-                      ) : (
-                        <div className="absolute top-1 left-1 px-1 rounded bg-black/80 text-[9px] font-black text-[#F5C518]">
-                          E{ep.episodeNumber}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0 py-0.5">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-[10px] font-black text-[#F5C518] uppercase">
-                          S{String(selectedSeasonNumber).padStart(2, '0')} E{String(ep.episodeNumber).padStart(2, '0')}
-                        </span>
-                        {ep.runtime && (
-                          <span className="text-[10px] text-neutral-500 flex items-center gap-0.5">
-                            <Clock className="w-2.5 h-2.5" />
-                            {ep.runtime}m
-                          </span>
-                        )}
-                      </div>
-
-                      <h4
-                        className={`text-xs font-bold truncate mt-0.5 ${
-                          isActive ? 'text-[#F5C518]' : 'text-white group-hover:text-[#F5C518]'
-                        }`}
-                      >
-                        {ep.name || `Episode ${ep.episodeNumber}`}
-                      </h4>
-
-                      {ep.overview && (
-                        <p className="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">
-                          {ep.overview}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+          {/* Cast & Characters Carousel */}
+          {tvShow.cast && tvShow.cast.length > 0 && (
+            <CastCarousel cast={tvShow.cast} />
           )}
-
-          <div className="pt-2">
-            <Link
-              to={`/tv/${tvShow.slug}`}
-              className="w-full py-2.5 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-extrabold transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-[#F5C518]/20 cursor-pointer"
-            >
-              <span>Series Details & Cast</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
         </div>
+
+        {/* Right Column: Recommended Titles */}
+        {!cinemaMode && (
+          <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+            <RecommendedSidebar items={similar} type="tv" />
+          </div>
+        )}
       </div>
 
-      {/* ALL EPISODES FULL MODAL OVERLAY */}
-      {allEpisodesModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-5xl max-h-[85vh] bg-[#16171E] border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <h3 className="text-xl font-extrabold text-white">
-                  {tvShow.title} — All Episodes
-                </h3>
-                {/* Season switch in modal */}
-                <select
-                  value={selectedSeasonNumber}
-                  onChange={(e) => handleSeasonSelect(Number(e.target.value))}
-                  className="py-1 px-3 rounded-xl bg-[#0E0F12] border border-white/10 text-xs font-bold text-[#F5C518] outline-hidden cursor-pointer"
-                >
-                  {seasonsList.map((num) => (
-                    <option key={num} value={num} className="bg-[#16171E] text-white">
-                      Season {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setAllEpisodesModalOpen(false)}
-                className="p-2 rounded-xl bg-[#0E0F12] hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Episodes Grid in Modal */}
-            <div className="flex-1 overflow-y-auto no-scrollbar py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {episodesList.map((ep) => {
-                const isActive =
-                  selectedSeasonNumber === currentSeasonNum &&
-                  ep.episodeNumber === currentEpisodeNum;
-
-                return (
-                  <Link
-                    key={ep.id}
-                    to={`/watch/tv/${tvShow.slug}/season/${selectedSeasonNumber}/episode/${ep.episodeNumber}`}
-                    onClick={() => setAllEpisodesModalOpen(false)}
-                    className={`rounded-2xl overflow-hidden bg-[#0E0F12] border transition-all duration-300 group flex flex-col p-3 gap-2.5 ${
-                      isActive
-                        ? 'border-[#F5C518] bg-[#F5C518]/10'
-                        : 'border-white/5 hover:border-[#F5C518]/40'
-                    }`}
-                  >
-                    <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black/40">
-                      <img
-                        src={getTMDBImageUrl(ep.stillPath || tvShow.backdropPath, 'w500')}
-                        alt={ep.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src =
-                            'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80';
-                        }}
-                      />
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 text-[10px] font-black text-[#F5C518]">
-                        EP {ep.episodeNumber}
-                      </div>
-                      {isActive && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <Play className="w-8 h-8 fill-[#F5C518] text-[#F5C518]" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between text-xs font-bold text-[#F5C518]">
-                        <span>S{selectedSeasonNumber} E{ep.episodeNumber}</span>
-                        {ep.runtime && <span className="text-neutral-500 font-normal">{ep.runtime}m</span>}
-                      </div>
-                      <h4 className="text-xs font-bold text-white group-hover:text-[#F5C518] transition-colors line-clamp-1 mt-0.5">
-                        {ep.name || `Episode ${ep.episodeNumber}`}
-                      </h4>
-                      <p className="text-[11px] text-neutral-400 line-clamp-2 mt-1">
-                        {ep.overview || 'Watch this episode online in HD quality.'}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Modals */}
       {shareOpen && (
         <ShareModal
-          title={`${episodeTitle} - ${tvShow.title}`}
+          title={`${tvShow.title} - S${currentSeasonNum}E${currentEpisodeNum}`}
           url={window.location.href}
           isOpen={shareOpen}
           onClose={() => setShareOpen(false)}
@@ -573,7 +297,7 @@ export function WatchEpisode() {
         <ReportModal
           isOpen={reportOpen}
           onClose={() => setReportOpen(false)}
-          title={`${episodeTitle} - ${tvShow.title}`}
+          title={`${tvShow.title} S${currentSeasonNum}E${currentEpisodeNum}`}
           serverId={currentServer.id}
         />
       )}
@@ -582,11 +306,9 @@ export function WatchEpisode() {
         <DownloadModal
           isOpen={downloadOpen}
           onClose={() => setDownloadOpen(false)}
-          title={tvShow.title}
+          title={`${tvShow.title} S${currentSeasonNum}E${currentEpisodeNum}`}
           tmdbId={tvShow.tmdbId}
           type="tv"
-          season={currentSeasonNum}
-          episode={currentEpisodeNum}
         />
       )}
     </div>

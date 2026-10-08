@@ -88,6 +88,14 @@ export function Footer() {
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Support &amp; Info</h4>
             <ul className="space-y-2.5">
               <li>
+                <Link to="/api" className="text-[#F5C518] hover:text-[#FFD633] font-bold flex items-center gap-1.5 transition-colors">
+                  <span>Embed Player API</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#F5C518]/20 text-[#F5C518] font-black">
+                    FREE
+                  </span>
+                </Link>
+              </li>
+              <li>
                 <Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link>
               </li>
               <li>

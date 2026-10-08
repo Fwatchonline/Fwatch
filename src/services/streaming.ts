@@ -1,4 +1,5 @@
 import { StreamingProvider, StreamResult, SubtitleTrack, AudioTrack, StreamQuality } from '../types';
+import { formatSubtitleFullLabel, resolveLanguageInfo } from '../utils/languages';
 
 const COMMON_QUALITIES: StreamQuality[] = [
   { label: 'Auto (Adaptive)', value: 'auto' },
@@ -43,19 +44,25 @@ async function fetchDirectStream(
     throw new Error('No playable direct HLS URL returned by solver');
   }
 
-  const subtitles: SubtitleTrack[] = (data.subtitles || []).map((s: any, idx: number) => ({
-    id: `sub-${idx}-${s.language || 'en'}`,
-    label: s.label || s.language || `Subtitle ${idx + 1}`,
-    language: s.language || 'en',
-    url: s.url,
-    isDefault: idx === 0,
-  }));
+  const subtitles: SubtitleTrack[] = (data.subtitles || []).map((s: any, idx: number) => {
+    const formatted = formatSubtitleFullLabel(s.label, s.language);
+    return {
+      id: `sub-${idx}-${formatted.langCode || s.language || 'en'}`,
+      label: formatted.fullTitle,
+      language: formatted.langCode || s.language || 'en',
+      url: s.url,
+      isDefault: idx === 0,
+    };
+  });
 
-  const audioTracks: AudioTrack[] = (data.audioTracks || []).map((a: any, idx: number) => ({
-    id: `aud-${idx}-${a.language || 'en'}`,
-    label: a.label || a.language || `Audio ${idx + 1}`,
-    language: a.language || 'en',
-  }));
+  const audioTracks: AudioTrack[] = (data.audioTracks || []).map((a: any, idx: number) => {
+    const info = resolveLanguageInfo(a.language, a.label);
+    return {
+      id: `aud-${idx}-${info.code || a.language || 'en'}`,
+      label: a.label && a.label !== a.language && a.label.length > 3 ? a.label : info.name,
+      language: info.code || a.language || 'en',
+    };
+  });
 
   return {
     hlsUrl: chosenUrl,
@@ -449,13 +456,16 @@ export async function fetchVylaSubtitles(
     const res = await fetch(fetchUrl);
     if (!res.ok) return [];
     const data = await res.json();
-    return (data.subtitles || []).map((s: any, idx: number) => ({
-      id: s.id || `vyla-sub-${idx}`,
-      label: s.label || s.language || `Subtitle ${idx + 1}`,
-      language: s.language || 'en',
-      url: s.url,
-      isDefault: idx === 0,
-    }));
+    return (data.subtitles || []).map((s: any, idx: number) => {
+      const formatted = formatSubtitleFullLabel(s.label, s.language);
+      return {
+        id: s.id || `vyla-sub-${idx}`,
+        label: formatted.fullTitle,
+        language: formatted.langCode || s.language || 'en',
+        url: s.url,
+        isDefault: idx === 0,
+      };
+    });
   } catch {
     return [];
   }

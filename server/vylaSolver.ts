@@ -1,4 +1,5 @@
 import VylaSDK from '@vyla-entertainment/sdk';
+import { formatSubtitleFullLabel } from '../src/utils/languages.ts';
 
 export interface VylaStreamResult {
   ok: boolean;
@@ -101,11 +102,12 @@ export async function resolveVylaHls(
     .filter((sub) => sub?.file)
     .slice(0, 50)
     .map((sub, idx) => {
-      const label = sub.label || `Subtitle ${idx + 1}`;
-      const lang = label.toLowerCase().slice(0, 2);
+      const rawLabel = sub.label || `Subtitle ${idx + 1}`;
+      const rawLang = sub.language || rawLabel.toLowerCase().slice(0, 3);
+      const formatted = formatSubtitleFullLabel(rawLabel, rawLang);
       return {
-        language: lang,
-        label,
+        language: formatted.langCode || 'en',
+        label: formatted.fullTitle,
         url: `/api/hls?url=${encodeURIComponent(sub.file)}`,
       };
     });
@@ -222,12 +224,13 @@ export async function getVylaSubtitles(
       .filter((sub: any) => sub?.file)
       .slice(0, 100)
       .map((sub: any, idx: number) => {
-        const label = sub.label || `Subtitle ${idx + 1}`;
-        const lang = label.toLowerCase().slice(0, 2);
+        const rawLabel = sub.label || `Subtitle ${idx + 1}`;
+        const rawLang = sub.language || rawLabel.toLowerCase().slice(0, 3);
+        const formatted = formatSubtitleFullLabel(rawLabel, rawLang);
         return {
           id: `vyla-sub-${idx}`,
-          language: lang,
-          label,
+          language: formatted.langCode || 'en',
+          label: formatted.fullTitle,
           type: sub.type || 'vtt',
           source: sub.source || 'vyla',
           url: `/api/hls?url=${encodeURIComponent(sub.file)}`,

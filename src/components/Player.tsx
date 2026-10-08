@@ -30,10 +30,12 @@ import {
   RefreshCw,
   Maximize2,
   Sparkles,
+  Search,
 } from 'lucide-react';
 import { StreamResult, SubtitleTrack, AudioTrack } from '../types';
 import { fetchVylaSubtitles } from '../services/streaming';
 import { useWatchProgress } from '../hooks/useWatchProgress';
+import { enrichAndSortSubtitles, resolveLanguageInfo } from '../utils/languages';
 
 interface PlayerProps {
   streamResult: StreamResult;
@@ -53,6 +55,13 @@ interface PlayerProps {
   onShare?: () => void;
   cinemaMode?: boolean;
   onToggleCinemaMode?: () => void;
+  accentColor?: string;
+  autoPlay?: boolean;
+  isEmbed?: boolean;
+  showOverlay?: boolean;
+  onEpisodeEnd?: () => void;
+  onTimeUpdate?: (currentTime: number, duration: number) => void;
+  onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
 interface HlsLevelItem {
@@ -99,6 +108,13 @@ export function Player({
   onShare,
   cinemaMode = false,
   onToggleCinemaMode,
+  accentColor = '#F5C518',
+  autoPlay = false,
+  isEmbed = false,
+  showOverlay = true,
+  onEpisodeEnd,
+  onTimeUpdate,
+  onPlayStateChange,
 }: PlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -129,12 +145,15 @@ export function Player({
   const [currentRenderedQuality, setCurrentRenderedQuality] = useState<string>('Auto');
 
   // Pre-populate Audio Tracks from stream result and default to English
-  const initialAudios: AudioTrackItem[] = (streamResult.audioTracks || []).map((a, idx) => ({
-    index: idx,
-    id: a.id || `audio-${idx}`,
-    label: a.label,
-    language: a.language,
-  }));
+  const initialAudios: AudioTrackItem[] = (streamResult.audioTracks || []).map((a, idx) => {
+    const info = resolveLanguageInfo(a.language, a.label);
+    return {
+      index: idx,
+      id: a.id || `audio-${idx}`,
+      label: a.label && a.label !== a.language && a.label.length > 3 ? a.label : info.name,
+      language: info.code || a.language || 'en',
+    };
+  });
   const defaultEngAudioIdx = initialAudios.findIndex(
     (a) => a.language?.toLowerCase().startsWith('en') || a.label.toLowerCase().includes('english')
   );
@@ -144,34 +163,31 @@ export function Player({
     defaultEngAudioIdx !== -1 ? defaultEngAudioIdx : 0
   );
 
-  // Pre-populate Subtitle Tracks from stream result, prioritizing English
-  const initialSubtitles: SubtitleItem[] = (streamResult.subtitles || []).map((s) => ({
-    id: s.id,
-    label: s.label,
-    language: s.language,
-    url: s.url,
-  }));
-  initialSubtitles.sort((a, b) => {
-    const aIsEng = a.language.toLowerCase().startsWith('en') || a.label.toLowerCase().includes('english');
-    const bIsEng = b.language.toLowerCase().startsWith('en') || b.label.toLowerCase().includes('english');
-    if (aIsEng && !bIsEng) return -1;
-    if (!aIsEng && bIsEng) return 1;
-    return a.label.localeCompare(b.label);
-  });
+  // Pre-populate Subtitle Tracks from stream result with full names and priority
+  const initialSubtitles: SubtitleItem[] = enrichAndSortSubtitles(
+    (streamResult.subtitles || []).map((s) => ({
+      id: s.id,
+      label: s.label,
+      language: s.language,
+      url: s.url,
+    }))
+  );
 
   const [subtitles, setSubtitles] = useState<SubtitleItem[]>(initialSubtitles);
   const [selectedSubtitleId, setSelectedSubtitleId] = useState<string>('off');
+  const [subtitleSearch, setSubtitleSearch] = useState('');
 
-  // Load comprehensive multi-language subtitles from Vyla SDK
+  // Load comprehensive multi-language subtitles from Vyla SDK with full language names
   useEffect(() => {
     let mounted = true;
     fetchVylaSubtitles(tmdbId, type, seasonNumber, episodeNumber)
       .then((vylaSubs) => {
         if (!mounted || !vylaSubs || vylaSubs.length === 0) return;
         setSubtitles((prev) => {
-          const existingUrls = new Set(prev.map((s) => s.url));
+          const existingUrls = new Set(prev.map((s) => s.url).filter(Boolean));
+          const existingIds = new Set(prev.map((s) => s.id));
           const newSubs: SubtitleItem[] = vylaSubs
-            .filter((s) => s.url && !existingUrls.has(s.url))
+            .filter((s) => (!s.url || !existingUrls.has(s.url)) && !existingIds.has(s.id))
             .map((s) => ({
               id: s.id,
               label: s.label,
@@ -179,15 +195,7 @@ export function Player({
               url: s.url,
             }));
           if (newSubs.length === 0) return prev;
-          const combined = [...prev, ...newSubs];
-          combined.sort((a, b) => {
-            const aIsEng = a.language.toLowerCase().startsWith('en') || a.label.toLowerCase().includes('english');
-            const bIsEng = b.language.toLowerCase().startsWith('en') || b.label.toLowerCase().includes('english');
-            if (aIsEng && !bIsEng) return -1;
-            if (!aIsEng && bIsEng) return 1;
-            return a.label.localeCompare(b.label);
-          });
-          return combined;
+          return enrichAndSortSubtitles([...prev, ...newSubs]);
         });
       })
       .catch(() => {});
@@ -268,19 +276,25 @@ export function Player({
       const syncAudioTracks = () => {
         let audios: AudioTrackItem[] = [];
         if (hls.audioTracks && hls.audioTracks.length > 0) {
-          audios = hls.audioTracks.map((a, idx) => ({
-            index: idx,
-            id: `audio-${idx}`,
-            label: a.name || a.lang || `Track ${idx + 1}`,
-            language: a.lang || 'und',
-          }));
+          audios = hls.audioTracks.map((a, idx) => {
+            const info = resolveLanguageInfo(a.lang, a.name);
+            return {
+              index: idx,
+              id: `audio-${idx}`,
+              label: a.name && a.name !== a.lang && a.name.length > 3 ? a.name : info.name,
+              language: info.code || a.lang || 'und',
+            };
+          });
         } else if (streamResult.audioTracks && streamResult.audioTracks.length > 0) {
-          audios = streamResult.audioTracks.map((a, idx) => ({
-            index: idx,
-            id: a.id || `audio-${idx}`,
-            label: a.label,
-            language: a.language,
-          }));
+          audios = streamResult.audioTracks.map((a, idx) => {
+            const info = resolveLanguageInfo(a.language, a.label);
+            return {
+              index: idx,
+              id: a.id || `audio-${idx}`,
+              label: a.label && a.label !== a.language && a.label.length > 3 ? a.label : info.name,
+              language: info.code || a.language || 'en',
+            };
+          });
         }
 
         if (audios.length > 0) {
@@ -311,7 +325,8 @@ export function Player({
         // 1. Add all external/backend subtitles
         if (streamResult.subtitles && streamResult.subtitles.length > 0) {
           streamResult.subtitles.forEach((s) => {
-            subsMap.set(s.language.toLowerCase(), {
+            const key = s.url || s.id;
+            subsMap.set(key, {
               id: s.id,
               label: s.label,
               language: s.language,
@@ -323,43 +338,32 @@ export function Player({
         // 2. Add/merge internal HLS subtitle tracks
         if (hls.subtitleTracks && hls.subtitleTracks.length > 0) {
           hls.subtitleTracks.forEach((st, idx) => {
-            const langKey = (st.lang || st.name || `sub-${idx}`).toLowerCase();
-            const existing = subsMap.get(langKey);
-            if (existing) {
-              existing.hlsIndex = idx;
-              existing.label = st.name || existing.label;
-            } else {
-              subsMap.set(langKey, {
-                id: `hls-sub-${idx}`,
-                label: st.name || st.lang || `Subtitle ${idx + 1}`,
-                language: st.lang || 'en',
-                hlsIndex: idx,
-              });
-            }
+            const trackKey = `hls-sub-${idx}`;
+            subsMap.set(trackKey, {
+              id: trackKey,
+              label: st.name || st.lang || `Subtitle ${idx + 1}`,
+              language: st.lang || 'en',
+              hlsIndex: idx,
+            });
           });
         }
 
-        const resultSubs = Array.from(subsMap.values());
-        // Sort with English first, then alphabetical
-        resultSubs.sort((a, b) => {
-          const aIsEng =
-            a.language.toLowerCase().startsWith('en') ||
-            a.label.toLowerCase().includes('english');
-          const bIsEng =
-            b.language.toLowerCase().startsWith('en') ||
-            b.label.toLowerCase().includes('english');
-          if (aIsEng && !bIsEng) return -1;
-          if (!aIsEng && bIsEng) return 1;
-          return a.label.localeCompare(b.label);
-        });
-
-        if (resultSubs.length > 0) {
-          setSubtitles(resultSubs);
+        const rawList = Array.from(subsMap.values());
+        if (rawList.length > 0) {
+          setSubtitles(enrichAndSortSubtitles(rawList));
         }
       };
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
         setIsLoading(false);
+
+        if (autoPlay && video) {
+          video.play().then(() => setIsPlaying(true)).catch(() => {
+            video.muted = true;
+            setIsMuted(true);
+            video.play().then(() => setIsPlaying(true)).catch(() => {});
+          });
+        }
 
         // 1. Parse Real HLS Quality Levels
         if (data.levels && data.levels.length > 0) {
@@ -914,34 +918,61 @@ export function Player({
   const activeAudioLabel =
     audioTracks.find((a) => a.index === selectedAudioIndex)?.label || 'English';
 
+  const filteredSubtitles = subtitleSearch.trim()
+    ? subtitles.filter(
+        (s) =>
+          s.label.toLowerCase().includes(subtitleSearch.toLowerCase()) ||
+          s.language.toLowerCase().includes(subtitleSearch.toLowerCase())
+      )
+    : subtitles;
+
   return (
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onDoubleClick={toggleFullscreen}
-      className="relative w-full aspect-video max-h-[85vh] bg-black rounded-2xl overflow-hidden shadow-2xl group border border-white/10 select-none"
+      style={{ ['--player-accent' as any]: accentColor }}
+      className={`relative select-none overflow-hidden bg-black ${
+        isEmbed
+          ? 'w-full h-full min-h-screen'
+          : 'w-full aspect-video max-h-[85vh] rounded-2xl shadow-2xl group border border-white/10'
+      }`}
     >
       {/* Video Element */}
       <video
-            ref={videoRef}
-            onClick={togglePlay}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onTimeUpdate={handleTimeUpdate}
-            onCanPlay={() => setIsLoading(false)}
-            onLoadedData={() => setIsLoading(false)}
-            onLoadedMetadata={() => setIsLoading(false)}
-            onWaiting={() => setIsLoading(true)}
-            onPlaying={() => setIsLoading(false)}
-            playsInline
-            className={`w-full h-full cursor-pointer ${
-              videoFit === 'cover'
-                ? 'object-cover'
-                : videoFit === 'fill'
-                ? 'object-fill'
-                : 'object-contain'
-            }`}
-          >
+        ref={videoRef}
+        onClick={togglePlay}
+        onPlay={() => {
+          setIsPlaying(true);
+          onPlayStateChange?.(true);
+        }}
+        onPause={() => {
+          setIsPlaying(false);
+          onPlayStateChange?.(false);
+        }}
+        onEnded={() => {
+          setIsPlaying(false);
+          onPlayStateChange?.(false);
+          onEpisodeEnd?.();
+        }}
+        onTimeUpdate={() => {
+          handleTimeUpdate();
+          onTimeUpdate?.(videoRef.current?.currentTime || 0, videoRef.current?.duration || 0);
+        }}
+        onCanPlay={() => setIsLoading(false)}
+        onLoadedData={() => setIsLoading(false)}
+        onLoadedMetadata={() => setIsLoading(false)}
+        onWaiting={() => setIsLoading(true)}
+        onPlaying={() => setIsLoading(false)}
+        playsInline
+        className={`w-full h-full cursor-pointer ${
+          videoFit === 'cover'
+            ? 'object-cover'
+            : videoFit === 'fill'
+            ? 'object-fill'
+            : 'object-contain'
+        }`}
+      >
             {/* Render external WebVTT tracks */}
             {subtitles
               .filter((s) => s.url)
@@ -1054,77 +1085,85 @@ export function Player({
           onClick={togglePlay}
           className="absolute inset-0 flex items-center justify-center cursor-pointer z-20"
         >
-          <div className="w-20 h-20 rounded-full bg-[#F5C518] hover:bg-[#E5B508] text-black flex items-center justify-center shadow-2xl shadow-[#F5C518]/50 transform hover:scale-110 active:scale-95 transition-all">
+          <div
+            style={{ backgroundColor: accentColor, boxShadow: `0 20px 25px -5px ${accentColor}66` }}
+            className="w-20 h-20 rounded-full text-black flex items-center justify-center shadow-2xl transform hover:scale-110 active:scale-95 transition-all"
+          >
             <Play className="w-10 h-10 fill-black ml-1.5" />
           </div>
         </div>
       )}
 
       {/* Top Header Bar inside Video */}
-      <div
-        className={`absolute top-0 inset-x-0 p-3 sm:p-5 bg-gradient-to-b from-black/90 via-black/40 to-transparent flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-auto ${
-          showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="max-w-[65%] truncate">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-[#F5C518] text-black text-[10px] font-extrabold uppercase tracking-wide">
-              {currentRenderedQuality}
-            </span>
-            <span className="px-2 py-0.5 rounded bg-white/10 text-neutral-300 text-[10px] font-bold uppercase tracking-wide">
-              {activeAudioLabel}
-            </span>
-            <h2 className="text-sm sm:text-base font-bold text-white drop-shadow truncate">
-              {title}
-            </h2>
+      {showOverlay && (
+        <div
+          className={`absolute top-0 inset-x-0 p-3 sm:p-5 bg-gradient-to-b from-black/90 via-black/40 to-transparent flex items-center justify-between z-30 transition-opacity duration-300 pointer-events-auto ${
+            showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          <div className="max-w-[65%] truncate">
+            <div className="flex items-center gap-2">
+              <span
+                style={{ backgroundColor: accentColor }}
+                className="px-2 py-0.5 rounded text-black text-[10px] font-extrabold uppercase tracking-wide"
+              >
+                {currentRenderedQuality}
+              </span>
+              <span className="px-2 py-0.5 rounded bg-white/10 text-neutral-300 text-[10px] font-bold uppercase tracking-wide">
+                {activeAudioLabel}
+              </span>
+              <h2 className="text-sm sm:text-base font-bold text-white drop-shadow truncate">
+                {title}
+              </h2>
+            </div>
+            {type === 'tv' && episodeName && (
+              <p className="text-xs text-neutral-300 drop-shadow truncate mt-0.5">
+                S{String(seasonNumber).padStart(2, '0')}E{String(episodeNumber).padStart(2, '0')} •{' '}
+                {episodeName}
+              </p>
+            )}
           </div>
-          {type === 'tv' && episodeName && (
-            <p className="text-xs text-neutral-300 drop-shadow truncate mt-0.5">
-              S{String(seasonNumber).padStart(2, '0')}E{String(episodeNumber).padStart(2, '0')} •{' '}
-              {episodeName}
-            </p>
-          )}
+
+          <div className="flex items-center gap-2">
+            {onToggleCinemaMode && !isEmbed && (
+              <button
+                type="button"
+                onClick={onToggleCinemaMode}
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                  cinemaMode
+                    ? 'bg-[#F5C518] text-black font-bold'
+                    : 'bg-black/50 hover:bg-black/80 text-white border border-white/10'
+                }`}
+                title={cinemaMode ? 'Turn On Lights' : 'Cinema Mode (Dim Lights)'}
+              >
+                {cinemaMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+            )}
+
+            {onShare && (
+              <button
+                type="button"
+                onClick={onShare}
+                className="p-2 rounded-xl bg-black/50 hover:bg-black/80 text-white border border-white/10 transition-colors cursor-pointer"
+                title="Share Stream"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+            )}
+
+            {onReportIssue && (
+              <button
+                type="button"
+                onClick={onReportIssue}
+                className="p-2 rounded-xl bg-black/50 hover:bg-black/80 text-white border border-white/10 transition-colors cursor-pointer"
+                title="Report Issue"
+              >
+                <AlertCircle className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          {onToggleCinemaMode && (
-            <button
-              type="button"
-              onClick={onToggleCinemaMode}
-              className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                cinemaMode
-                  ? 'bg-[#F5C518] text-black font-bold'
-                  : 'bg-black/50 hover:bg-black/80 text-white border border-white/10'
-              }`}
-              title={cinemaMode ? 'Turn On Lights' : 'Cinema Mode (Dim Lights)'}
-            >
-              {cinemaMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-          )}
-
-          {onShare && (
-            <button
-              type="button"
-              onClick={onShare}
-              className="p-2 rounded-xl bg-black/50 hover:bg-black/80 text-white border border-white/10 transition-colors cursor-pointer"
-              title="Share Stream"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-          )}
-
-          {onReportIssue && (
-            <button
-              type="button"
-              onClick={onReportIssue}
-              className="p-2 rounded-xl bg-black/50 hover:bg-black/80 text-white border border-white/10 transition-colors cursor-pointer"
-              title="Report Issue"
-            >
-              <AlertCircle className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* ------------------------------------------------------------- */}
       {/* BOTTOM CONTROL BAR */}
@@ -1149,14 +1188,14 @@ export function Player({
 
           {/* Played Progress */}
           <div
-            style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
-            className="absolute left-0 top-0 h-full bg-[#F5C518] rounded-lg pointer-events-none"
+            style={{ width: `${(currentTime / (duration || 1)) * 100}%`, backgroundColor: accentColor }}
+            className="absolute left-0 top-0 h-full rounded-lg pointer-events-none"
           />
 
           {/* Scrubber Knob */}
           <div
-            style={{ left: `${(currentTime / (duration || 1)) * 100}%` }}
-            className="absolute -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-[#F5C518] shadow-md border-2 border-black scale-0 group-hover/timeline:scale-100 transition-transform pointer-events-none"
+            style={{ left: `${(currentTime / (duration || 1)) * 100}%`, backgroundColor: accentColor }}
+            className="absolute -translate-x-1/2 w-3.5 h-3.5 rounded-full shadow-md border-2 border-black scale-0 group-hover/timeline:scale-100 transition-transform pointer-events-none"
           />
 
           {/* Hover Time Tooltip */}
@@ -1286,44 +1325,68 @@ export function Player({
 
               {/* Quick Subtitles Dropdown */}
               {showQuickSubtitles && (
-                <div className="absolute bottom-full right-0 mb-3 w-60 glass-dropdown rounded-2xl shadow-2xl p-2 z-50 text-xs border border-white/10 animate-fade-in max-h-80 overflow-y-auto">
-                  <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-white/10 mb-1">
-                    <span className="font-extrabold text-neutral-400 uppercase tracking-wider text-[10px]">
-                      Subtitles
+                <div className="absolute bottom-full right-0 mb-3 w-72 sm:w-80 glass-dropdown rounded-2xl shadow-2xl p-2.5 z-50 text-xs border border-white/10 animate-fade-in max-h-96 flex flex-col">
+                  <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-white/10 mb-2">
+                    <span className="font-extrabold text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <Subtitles className="w-3.5 h-3.5 text-[#F5C518]" />
+                      <span>Subtitles</span>
                     </span>
-                    <span className="text-[10px] text-[#F5C518] font-bold">
+                    <span className="text-[10px] text-[#F5C518] font-bold bg-[#F5C518]/15 px-2 py-0.5 rounded-full border border-[#F5C518]/30">
                       {subtitles.length} Available
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleSubtitleChange('off')}
-                    className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between cursor-pointer ${
-                      selectedSubtitleId === 'off'
-                        ? 'bg-[#F5C518] text-black font-extrabold'
-                        : 'text-neutral-300 hover:bg-white/10'
-                    }`}
-                  >
-                    <span>Off</span>
-                    {selectedSubtitleId === 'off' && <Check className="w-3.5 h-3.5" />}
-                  </button>
+                  {/* Search Input when multiple subtitles exist */}
+                  {subtitles.length > 5 && (
+                    <div className="relative mb-2 px-0.5">
+                      <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search language (e.g. bosanski, eng)..."
+                        value={subtitleSearch}
+                        onChange={(e) => setSubtitleSearch(e.target.value)}
+                        className="w-full bg-[#0D0F14] text-white placeholder-neutral-500 text-xs rounded-xl pl-8 pr-3 py-1.5 border border-white/10 focus:outline-none focus:border-[#F5C518]"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  )}
 
-                  {subtitles.map((s) => (
+                  <div className="overflow-y-auto space-y-1 flex-1 pr-0.5 max-h-64 no-scrollbar">
                     <button
-                      key={s.id}
                       type="button"
-                      onClick={() => handleSubtitleChange(s.id)}
-                      className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between cursor-pointer ${
-                        selectedSubtitleId === s.id
-                          ? 'bg-[#F5C518] text-black font-extrabold'
-                          : 'text-neutral-300 hover:bg-white/10'
+                      onClick={() => handleSubtitleChange('off')}
+                      className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                        selectedSubtitleId === 'off'
+                          ? 'bg-[#F5C518] text-black font-extrabold shadow-md'
+                          : 'text-neutral-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
-                      <span className="truncate">{s.label}</span>
-                      {selectedSubtitleId === s.id && <Check className="w-3.5 h-3.5 ml-1" />}
+                      <span className="font-bold">Off</span>
+                      {selectedSubtitleId === 'off' && <Check className="w-3.5 h-3.5 ml-1" />}
                     </button>
-                  ))}
+
+                    {filteredSubtitles.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => handleSubtitleChange(s.id)}
+                        className={`w-full text-left px-3 py-2 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                          selectedSubtitleId === s.id
+                            ? 'bg-[#F5C518] text-black font-extrabold shadow-md'
+                            : 'text-neutral-200 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <span className="truncate font-medium">{s.label}</span>
+                        {selectedSubtitleId === s.id && <Check className="w-3.5 h-3.5 ml-1 flex-shrink-0 text-black" />}
+                      </button>
+                    ))}
+
+                    {filteredSubtitles.length === 0 && (
+                      <div className="text-center py-4 text-neutral-500 text-xs">
+                        No subtitles match "{subtitleSearch}"
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

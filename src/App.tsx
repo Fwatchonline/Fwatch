@@ -22,6 +22,8 @@ import { Contact } from './pages/Contact';
 import { Help } from './pages/Help';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
+import { EmbedPlayer } from './pages/EmbedPlayer';
+import { EmbedApiDocs } from './pages/EmbedApiDocs';
 import { NotFound } from './pages/NotFound';
 
 function ScrollToTop() {
@@ -43,9 +45,21 @@ export default function App() {
           {/* Standalone Login Screen */}
           <Route path="/login" element={<Login />} />
 
+          {/* Standalone Embed Player Routes (100% Fullscreen for External Iframes) */}
+          <Route path="/embed/movie/:id" element={<EmbedPlayer type="movie" />} />
+          <Route
+            path="/embed/tv/:id/:seasonNumber/:episodeNumber"
+            element={<EmbedPlayer type="tv" />}
+          />
+          <Route path="/embed/tv/:id" element={<EmbedPlayer type="tv" />} />
+
           {/* Standard T.Movie Layout (Sidebar + TopNav + Content + Footer) */}
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/api" element={<EmbedApiDocs />} />
+            <Route path="/embed-api" element={<EmbedApiDocs />} />
+            <Route path="/api-docs" element={<EmbedApiDocs />} />
+            <Route path="/docs/api" element={<EmbedApiDocs />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/tv" element={<TVShows />} />
             <Route path="/series" element={<TVShows />} />

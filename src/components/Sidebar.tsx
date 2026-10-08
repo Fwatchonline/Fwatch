@@ -13,6 +13,7 @@ import {
   Play,
   Sparkles,
   Tv,
+  Code2,
 } from 'lucide-react';
 import { useUI } from '../context/UIContext';
 import { useWatchlist } from '../hooks/useWatchlist';
@@ -37,6 +38,7 @@ export function Sidebar() {
   ];
 
   const subItems = [
+    { label: 'Embed API', path: '/api', icon: Code2 },
     { label: 'Contact Us', path: '/contact', icon: Headphones },
     { label: 'Help Center', path: '/help', icon: HelpCircle },
     { label: 'Setting', path: '/settings', icon: Settings },
