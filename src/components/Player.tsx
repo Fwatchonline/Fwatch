@@ -951,22 +951,6 @@ export function Player({
             </div>
           )}
 
-          {/* Top Header info */}
-          <div className="relative z-10 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-lg bg-[#E50914] text-white text-[11px] font-black uppercase tracking-wider shadow-lg shadow-red-950/60">
-                {type === 'movie' ? 'Movie' : 'TV Series'}
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-white/10 backdrop-blur-md text-white text-[11px] font-bold border border-white/10">
-                4K Ultra HD
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-xs text-neutral-300">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-              <span>{activeServerObj.name.split('(')[0].trim()}</span>
-            </div>
-          </div>
-
           {/* Center Prominent Play Button */}
           <div className="relative z-10 flex flex-col items-center justify-center my-auto text-center space-y-4">
             <div className="relative flex items-center justify-center">
@@ -991,12 +975,6 @@ export function Player({
                 Click anywhere or press <strong className="text-white">Space</strong> to begin streaming
               </p>
             </div>
-          </div>
-
-          {/* Bottom strip */}
-          <div className="relative z-10 flex items-center justify-between text-[11px] text-[#A1A7B5] pt-2 border-t border-white/10">
-            <span>Direct HLS Edge Stream</span>
-            <span>Dolby Digital · Multi-Subtitles</span>
           </div>
         </div>
       )}

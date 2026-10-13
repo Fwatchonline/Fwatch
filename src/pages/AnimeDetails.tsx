@@ -34,10 +34,13 @@ import {
   parseAnimeSlug,
   generateAnimeSlug,
 } from '../services/anilist';
-import { AnimeMedia } from '../types';
+import { AnimeMedia, StreamResult, StreamingProvider } from '../types';
 import { SEO } from '../components/SEO';
 import { AnimeCard } from '../components/AnimeCard';
 import { ReportModal } from '../components/ReportModal';
+import { Player } from '../components/Player';
+import { ServerSelector } from '../components/ServerSelector';
+import { STREAMING_SERVERS, getBestWorkingServer, setPreferredServerId } from '../services/streaming';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { slugifyCountry } from '../utils/countryHelper';
 import { slugify } from '../utils/slugify';
@@ -53,10 +56,16 @@ export function AnimeDetails() {
   const [showTrailer, setShowTrailer] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [activeEpisode, setActiveEpisode] = useState(1);
-  const [selectedServer, setSelectedServer] = useState<'vidlink' | 'vidsrc' | '2embed'>('vidlink');
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [realViews, setRealViews] = useState<number>(284);
+
+  // Direct Player State (Replaces embed iframe with native player)
+  const [resolvedMedia, setResolvedMedia] = useState<{ id: number; type: 'movie' | 'tv'; slug: string } | null>(null);
+  const [streamResult, setStreamResult] = useState<StreamResult | null>(null);
+  const [currentServer, setCurrentServer] = useState<StreamingProvider>(STREAMING_SERVERS[0]);
+  const [failedServerIds, setFailedServerIds] = useState<string[]>([]);
+  const [streamLoading, setStreamLoading] = useState(false);
 
   const { watchlist, toggleWatchlist } = useWatchlist();
   const castScrollRef = useRef<HTMLDivElement>(null);
@@ -83,6 +92,31 @@ export function AnimeDetails() {
         tmdbService.recordView('anime', id).then((v) => {
           if (mounted && v) setRealViews(v);
         });
+
+        // Resolve matching TMDB item for pure native player playback
+        const searchTitle = res.title.english || res.title.romaji;
+        if (searchTitle) {
+          fetch(`/api/tmdb/search/multi?query=${encodeURIComponent(searchTitle)}`)
+            .then((r) => r.json())
+            .then((searchData) => {
+              if (!mounted) return;
+              const results = searchData?.results || [];
+              const isAnimMovie = res.format === 'MOVIE';
+              // Find matching entry
+              const match = results.find((item: any) =>
+                isAnimMovie ? item.type === 'movie' : item.type === 'tv'
+              ) || results[0];
+
+              if (match) {
+                setResolvedMedia({
+                  id: match.tmdbId || match.id,
+                  type: isAnimMovie ? 'movie' : 'tv',
+                  slug: match.slug || `${match.id}-${slugify(searchTitle)}`,
+                });
+              }
+            })
+            .catch(() => {});
+        }
       });
     } else {
       setLoading(false);
@@ -93,12 +127,57 @@ export function AnimeDetails() {
     };
   }, [slug]);
 
-  // Handle URL watch param
+  // Load stream with our native HLS engine whenever player is opened or episode changes
   useEffect(() => {
-    if (searchParams.get('watch') === '1') {
-      setShowPlayer(true);
+    let mounted = true;
+    if (!showPlayer || !anime) return;
+
+    setStreamLoading(true);
+    const tmdbTargetId = resolvedMedia?.id || anime.id;
+    const mediaType = (resolvedMedia?.type || (anime.format === 'MOVIE' ? 'movie' : 'tv')) as 'movie' | 'tv';
+
+    getBestWorkingServer({
+      tmdbId: tmdbTargetId,
+      type: mediaType,
+      season: 1,
+      episode: activeEpisode,
+    })
+      .then((working) => {
+        if (!mounted) return;
+        if (working) {
+          setCurrentServer(working.provider);
+          setStreamResult(working.stream);
+        }
+        setStreamLoading(false);
+      })
+      .catch(() => {
+        if (mounted) setStreamLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [showPlayer, anime, resolvedMedia, activeEpisode]);
+
+  const handleSelectServer = async (server: StreamingProvider) => {
+    if (!anime) return;
+    setCurrentServer(server);
+    setPreferredServerId(server.id);
+    const tmdbTargetId = resolvedMedia?.id || anime.id;
+    const mediaType = (resolvedMedia?.type || (anime.format === 'MOVIE' ? 'movie' : 'tv')) as 'movie' | 'tv';
+
+    try {
+      const stream = await server.getStream({
+        tmdbId: tmdbTargetId,
+        type: mediaType,
+        season: 1,
+        episode: activeEpisode,
+      });
+      setStreamResult(stream);
+    } catch {
+      setFailedServerIds((prev) => [...prev, server.id]);
     }
-  }, [searchParams]);
+  };
 
   if (loading) {
     return (
@@ -180,26 +259,6 @@ export function AnimeDetails() {
     }
   };
 
-  const getEmbedStreamUrl = () => {
-    if (isMovie) {
-      if (selectedServer === 'vidlink') {
-        return `https://vidlink.pro/anime/${anime.id}/1?primaryColor=F5C518`;
-      }
-      if (selectedServer === 'vidsrc') {
-        return `https://vidsrc.to/embed/anime/${anime.id}/1`;
-      }
-      return `https://2embed.cc/embed/anime/${anime.id}/1`;
-    }
-
-    if (selectedServer === 'vidlink') {
-      return `https://vidlink.pro/anime/${anime.id}/${activeEpisode}?primaryColor=F5C518`;
-    }
-    if (selectedServer === 'vidsrc') {
-      return `https://vidsrc.to/embed/anime/${anime.id}/${activeEpisode}`;
-    }
-    return `https://2embed.cc/embed/anime/${anime.id}/${activeEpisode}`;
-  };
-
   return (
     <div className="space-y-12 pb-16">
       <SEO
@@ -225,7 +284,7 @@ export function AnimeDetails() {
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* 2. STREAMING PLAYER (When toggled on)                          */}
+      {/* 2. STREAMING PLAYER (Native HLS Player with Multi-CDN Servers) */}
       {/* ------------------------------------------------------------- */}
       {showPlayer && (
         <div className="space-y-4 rounded-3xl overflow-hidden bg-black/90 p-4 border border-white/10 shadow-2xl">
@@ -246,44 +305,64 @@ export function AnimeDetails() {
             </button>
           </div>
 
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl">
-            <iframe
-              src={getEmbedStreamUrl()}
-              title={`Watch ${title}`}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
-
-          {/* Server Switcher Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-xl bg-[#16171E] border border-white/5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-neutral-400">Stream Server:</span>
-              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/10">
-                {(['vidlink', 'vidsrc', '2embed'] as const).map((srv) => (
-                  <button
-                    key={srv}
-                    type="button"
-                    onClick={() => setSelectedServer(srv)}
-                    className={`px-3 py-1 rounded-lg text-xs font-extrabold uppercase transition-all cursor-pointer ${
-                      selectedServer === srv
-                        ? 'bg-[#E50914] text-white shadow shadow-red-900/40'
-                        : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    {srv === 'vidlink' ? 'VidLink Pro' : srv === 'vidsrc' ? 'VidSrc' : '2Embed'}
-                  </button>
-                ))}
-              </div>
+          {streamLoading && !streamResult ? (
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black border border-white/10 flex flex-col items-center justify-center gap-3">
+              <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-semibold text-neutral-400 animate-pulse">
+                Connecting to high-speed stream server...
+              </p>
             </div>
-
-            <div className="text-xs text-neutral-400">
-              <span className="text-white font-bold">
-                {isMovie ? 'Full Movie Stream' : `Episode ${activeEpisode} of ${totalEpisodes}`}
-              </span>
+          ) : streamResult ? (
+            <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+              <Player
+                streamResult={streamResult}
+                title={title}
+                episodeName={!isMovie ? `Episode ${activeEpisode}` : undefined}
+                tmdbId={resolvedMedia?.id || anime.id}
+                type={isMovie ? 'movie' : 'tv'}
+                slug={generateAnimeSlug(anime.id, title)}
+                posterPath={anime.coverImage?.large || null}
+                backdropPath={backdropUrl}
+                seasonNumber={1}
+                episodeNumber={activeEpisode}
+                totalEpisodesInSeason={totalEpisodes}
+                onPrevEpisode={
+                  !isMovie && activeEpisode > 1
+                    ? () => setActiveEpisode((prev) => Math.max(1, prev - 1))
+                    : undefined
+                }
+                onNextEpisode={
+                  !isMovie && activeEpisode < totalEpisodes
+                    ? () => setActiveEpisode((prev) => Math.min(totalEpisodes, prev + 1))
+                    : undefined
+                }
+                onReportIssue={() => setReportModalOpen(true)}
+                onShare={handleShare}
+                servers={STREAMING_SERVERS}
+                currentServerId={currentServer.id}
+                onSelectServer={handleSelectServer}
+                failedServerIds={failedServerIds}
+              />
             </div>
-          </div>
+          ) : (
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black border border-white/10 flex flex-col items-center justify-center gap-3 p-6 text-center">
+              <p className="text-sm font-bold text-white">Stream is initializing</p>
+              <button
+                type="button"
+                onClick={() => handleSelectServer(currentServer)}
+                className="px-4 py-2 rounded-xl bg-[#E50914] text-white text-xs font-bold"
+              >
+                Retry Stream
+              </button>
+            </div>
+          )}
+
+          {/* Native Source Selector */}
+          <ServerSelector
+            currentServerId={currentServer.id}
+            onSelectServer={handleSelectServer}
+            failedServerIds={failedServerIds}
+          />
         </div>
       )}
 

@@ -16,7 +16,6 @@ import { tmdbService } from '../services/tmdb';
 import { MediaItem } from '../types';
 import { getTMDBImageUrl } from '../utils/slugify';
 import { NotificationDrawer } from './NotificationDrawer';
-import { UserDropdown } from './UserDropdown';
 
 const GENRES_LIST = [
   { name: 'Action', slug: 'action' },
@@ -44,8 +43,6 @@ export function TopNav() {
     notificationsOpen,
     setNotificationsOpen,
     notifications,
-    userDropdownOpen,
-    setUserDropdownOpen,
   } = useUI();
 
   const [genresDropdownOpen, setGenresDropdownOpen] = useState(false);
@@ -301,22 +298,6 @@ export function TopNav() {
             </span>
           )}
         </button>
-
-        {/* User Profile Avatar */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#E50914] hover:scale-105 transition-transform flex-shrink-0 cursor-pointer shadow-md shadow-red-900/30"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          </button>
-          <UserDropdown />
-        </div>
       </div>
 
       <NotificationDrawer />

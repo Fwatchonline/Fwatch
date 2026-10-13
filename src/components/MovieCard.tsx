@@ -89,7 +89,7 @@ export function MovieCard({
       : 8);
   const latestEpTitle =
     matchingNotification?.episodeName ||
-    (isSeries ? `Sezona ${latestSeason} Epizoda ${latestEpisode}` : 'Novo 4K Izdanje');
+    (isSeries ? `Season ${latestSeason} Episode ${latestEpisode}` : 'New 4K Release');
 
   const displayRating = formatRating(media.imdbRating || media.voteAverage);
   const releaseYear = formatYear(media.releaseDate) || '2025';
@@ -374,7 +374,7 @@ export function MovieCard({
                 ))}
               </div>
 
-              {/* Obaveštenje za nove epizode / New Episode Notification Panel */}
+              {/* New Episode Notification Panel */}
               <div className="rounded-2xl bg-gradient-to-br from-red-950/80 via-[#180e14] to-[#0c0f18] border border-red-500/40 p-3 shadow-lg shadow-red-950/40 space-y-2 animate-in fade-in duration-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -384,11 +384,11 @@ export function MovieCard({
                     </span>
                     <span className="text-[11px] font-black uppercase tracking-wider text-red-400 flex items-center gap-1">
                       <Bell className="w-3 h-3 text-[#E50914]" />
-                      {isSeries ? 'Obaveštenje o novoj epizodi' : 'Novo 4K Izdanje'}
+                      {isSeries ? 'New Episode Alert' : 'New 4K Release'}
                     </span>
                   </div>
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
-                    {matchingNotification ? 'Objavljeno danas' : isSeries ? 'Nova epizoda' : '4K Ultra HD'}
+                    {matchingNotification ? 'Aired Today' : isSeries ? 'New Episode' : '4K Ultra HD'}
                   </span>
                 </div>
 
@@ -399,7 +399,7 @@ export function MovieCard({
                     </p>
                     <p className="text-[10.5px] text-neutral-400 truncate flex items-center gap-1 mt-0.5">
                       <Sparkles className="w-2.5 h-2.5 text-[#E50914]" />
-                      <span>{isSeries ? 'Spreman prevod • Multi-audio • 4K UHD' : 'Dodato sa EX-YU titlovima'}</span>
+                      <span>{isSeries ? 'English Subtitles • Multi-Audio • 4K UHD' : 'Available with Multi-Subtitles & 4K HDR'}</span>
                     </p>
                   </div>
 
@@ -407,10 +407,10 @@ export function MovieCard({
                     type="button"
                     onClick={handlePlayEpisodeClick}
                     className="px-3 py-1.5 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-[11px] font-black shrink-0 flex items-center gap-1 shadow-md shadow-red-900/50 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                    title={isSeries ? `Gledaj S${latestSeason} E${latestEpisode}` : 'Gledaj film'}
+                    title={isSeries ? `Watch S${latestSeason} E${latestEpisode}` : 'Watch Movie'}
                   >
                     <Play className="w-3 h-3 fill-white" />
-                    <span>{isSeries ? `S${latestSeason} E${latestEpisode}` : 'Pusti'}</span>
+                    <span>{isSeries ? `S${latestSeason} E${latestEpisode}` : 'Play'}</span>
                   </button>
                 </div>
               </div>
@@ -430,7 +430,7 @@ export function MovieCard({
                   title="Play"
                 >
                   <Play className="w-4 h-4 fill-white" />
-                  <span>{isSeries ? `Gledaj Seriju (S${latestSeason} E${latestEpisode})` : 'Pusti Film'}</span>
+                  <span>{isSeries ? `Watch Series (S${latestSeason} E${latestEpisode})` : 'Play Movie'}</span>
                 </button>
 
                 {/* Round Clapperboard / Trailer Button */}

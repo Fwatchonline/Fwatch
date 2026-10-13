@@ -9,18 +9,16 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Crown,
   Play,
   Sparkles,
   Tv,
-  Code2,
 } from 'lucide-react';
 import { useUI } from '../context/UIContext';
 import { useWatchlist } from '../hooks/useWatchlist';
 
 export function Sidebar() {
   const location = useLocation();
-  const { sidebarCollapsed, toggleSidebar, setPlansModalOpen } = useUI();
+  const { sidebarCollapsed, toggleSidebar } = useUI();
   const { watchlist } = useWatchlist();
 
   const isRouteActive = (path: string) => {
@@ -38,7 +36,6 @@ export function Sidebar() {
   ];
 
   const subItems = [
-    { label: 'Embed API', path: '/api', icon: Code2 },
     { label: 'Contact Us', path: '/contact', icon: Headphones },
     { label: 'Help Center', path: '/help', icon: HelpCircle },
     { label: 'Setting', path: '/settings', icon: Settings },
@@ -163,33 +160,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Bottom Subscription CTA Card */}
-      <div className="p-3 mb-2">
-        {!sidebarCollapsed ? (
-          <div className="p-3.5 rounded-2xl bg-[#191a22] border border-[#2b2d38] text-center">
-            <p className="text-[11px] text-neutral-400 leading-relaxed mb-3">
-              Click the button below to see the plans
-            </p>
-            <button
-              type="button"
-              onClick={() => setPlansModalOpen(true)}
-              className="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-[#E50914] border border-[#E50914] text-[#E50914] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-red-900/30 cursor-pointer"
-            >
-              <Crown className="w-4 h-4 text-[#E50914] group-hover:text-white group-hover:scale-110 transition-transform" />
-              <span>see plans</span>
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setPlansModalOpen(true)}
-            title="See Plans"
-            className="w-12 h-12 mx-auto rounded-xl border border-[#E50914] bg-[#E50914]/10 text-[#E50914] flex items-center justify-center hover:bg-[#E50914] hover:text-white transition-colors cursor-pointer"
-          >
-            <Crown className="w-5 h-5" />
-          </button>
-        )}
-      </div>
+      {/* Sidebar bottom spacing / footer */}
+      <div className="p-3 mb-2" />
     </aside>
   );
 }

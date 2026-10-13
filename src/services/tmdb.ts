@@ -871,24 +871,11 @@ export const tmdbService = {
       episodeNumber?: number;
     }[]
   > {
-    const data = await fetchFromApi<
-      {
-        id: string;
-        title: string;
-        mediaTitle: string;
-        episodeName?: string;
-        type: 'episode';
-        time: string;
-        image: string;
-        read: boolean;
-        link: string;
-        seasonNumber?: number;
-        episodeNumber?: number;
-      }[]
-    >('/tv/airing_today');
+    const data = await fetchFromApi<any>('/tv/airing_today');
 
-    if (data && Array.isArray(data) && data.length > 0) {
-      return data;
+    const list = Array.isArray(data) ? data : data?.results;
+    if (list && Array.isArray(list) && list.length > 0) {
+      return list;
     }
 
     return CURATED_EPISODES.slice(0, 6).map((ep) => ({

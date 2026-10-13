@@ -352,7 +352,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
                 </div>
               )}
 
-              {/* Obaveštenje za nove epizode / New Episode Notification */}
+              {/* New Episode Notification Box */}
               <div className="rounded-2xl bg-gradient-to-br from-red-950/80 via-[#180e14] to-[#0c0f18] border border-red-500/40 p-3 shadow-lg shadow-red-950/40 space-y-2 animate-in fade-in duration-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -362,22 +362,22 @@ export function AnimeCard({ anime }: AnimeCardProps) {
                     </span>
                     <span className="text-[11px] font-black uppercase tracking-wider text-red-400 flex items-center gap-1">
                       <Bell className="w-3 h-3 text-[#E50914]" />
-                      {isSeries ? 'Obaveštenje o novoj epizodi' : 'Novo Anime Izdanje'}
+                      {isSeries ? 'New Episode Alert' : 'New Anime Release'}
                     </span>
                   </div>
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
-                    {isReleasing ? 'Novo emitovanje' : 'Sub & Dub'}
+                    {isReleasing ? 'Now Airing' : 'Sub & Dub'}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-2.5 pt-0.5">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-black text-white truncate">
-                      {isSeries ? `Epizoda ${latestEpNum} • Najnovije izdanje` : `${title} (Full HD)`}
+                      {isSeries ? `Episode ${latestEpNum} • Latest Release` : `${title} (Full HD)`}
                     </p>
                     <p className="text-[10.5px] text-neutral-400 truncate flex items-center gap-1 mt-0.5">
                       <Sparkles className="w-2.5 h-2.5 text-[#E50914]" />
-                      <span>Japanski audio • SRB/ENG titlovi • 1080p</span>
+                      <span>Japanese Audio • English Subtitles • 1080p</span>
                     </p>
                   </div>
 
@@ -392,7 +392,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
                     className="px-3 py-1.5 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-[11px] font-black shrink-0 flex items-center gap-1 shadow-md shadow-red-900/50 hover:scale-105 active:scale-95 transition-all cursor-pointer"
                   >
                     <Play className="w-3 h-3 fill-white" />
-                    <span>Pusti</span>
+                    <span>Play</span>
                   </button>
                 </div>
               </div>
@@ -415,7 +415,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
                   className="flex-1 py-2.5 px-5 rounded-full bg-[#E50914] hover:bg-[#B81D24] active:scale-95 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-red-900/40 hover:shadow-red-800/60 transition-all cursor-pointer"
                 >
                   <Play className="w-4 h-4 fill-white" />
-                  <span>{isSeries ? `Gledaj Epizodu ${latestEpNum}` : 'Pusti Anime'}</span>
+                  <span>{isSeries ? `Watch Episode ${latestEpNum}` : 'Play Anime'}</span>
                 </button>
 
                 <button
