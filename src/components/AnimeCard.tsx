@@ -352,50 +352,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
                 </div>
               )}
 
-              {/* New Episode Notification Box */}
-              <div className="rounded-2xl bg-gradient-to-br from-red-950/80 via-[#180e14] to-[#0c0f18] border border-red-500/40 p-3 shadow-lg shadow-red-950/40 space-y-2 animate-in fade-in duration-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E50914]" />
-                    </span>
-                    <span className="text-[11px] font-black uppercase tracking-wider text-red-400 flex items-center gap-1">
-                      <Bell className="w-3 h-3 text-[#E50914]" />
-                      {isSeries ? 'New Episode Alert' : 'New Anime Release'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
-                    {isReleasing ? 'Now Airing' : 'Sub & Dub'}
-                  </span>
-                </div>
 
-                <div className="flex items-center justify-between gap-2.5 pt-0.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-black text-white truncate">
-                      {isSeries ? `Episode ${latestEpNum} • Latest Release` : `${title} (Full HD)`}
-                    </p>
-                    <p className="text-[10.5px] text-neutral-400 truncate flex items-center gap-1 mt-0.5">
-                      <Sparkles className="w-2.5 h-2.5 text-[#E50914]" />
-                      <span>Japanese Audio • English Subtitles • 1080p</span>
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsHovered(false);
-                      navigate(watchUrl);
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-[11px] font-black shrink-0 flex items-center gap-1 shadow-md shadow-red-900/50 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Play className="w-3 h-3 fill-white" />
-                    <span>Play</span>
-                  </button>
-                </div>
-              </div>
 
               {/* Description */}
               <p className="text-xs text-neutral-300 leading-relaxed line-clamp-2 font-normal drop-shadow-xs">

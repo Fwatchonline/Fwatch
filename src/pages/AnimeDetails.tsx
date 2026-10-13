@@ -810,7 +810,7 @@ export function AnimeDetails() {
         isOpen={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
         title={title}
-        serverId={selectedServer}
+        serverId={currentServer.id}
       />
     </div>
   );
