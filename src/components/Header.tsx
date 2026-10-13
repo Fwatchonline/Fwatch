@@ -107,15 +107,15 @@ export function Header() {
             <Link
               to="/"
               className="flex items-center gap-2 group flex-shrink-0"
-              aria-label="FWATCH Home"
+              aria-label="Tstream Home"
             >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#ef174f] to-[#b00f39] flex items-center justify-center shadow-lg shadow-[#ef174f]/30 group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#E50914] to-[#B81D24] flex items-center justify-center shadow-lg shadow-[#E50914]/30 group-hover:scale-105 transition-transform">
                 <Play className="w-5 h-5 text-white fill-white ml-0.5" />
               </div>
               <div className="flex flex-col">
                 <span className="text-xl sm:text-2xl font-black tracking-wider text-white bebas-font leading-none flex items-center gap-1">
-                  FWATCH
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ef174f] inline-block animate-pulse"></span>
+                  Tstream
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E50914] inline-block animate-pulse"></span>
                 </span>
                 <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold -mt-0.5">
                   Cinema &amp; Series
@@ -157,7 +157,7 @@ export function Header() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setSearchOpen(true)}
-                    className="w-48 lg:w-64 bg-[#151820]/90 border border-white/10 focus:border-[#ef174f] text-sm text-white placeholder-neutral-500 rounded-full pl-9 pr-4 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#ef174f] transition-all"
+                    className="w-48 lg:w-64 bg-[#151820]/90 border border-white/10 focus:border-[#E50914] text-sm text-white placeholder-neutral-500 rounded-full pl-9 pr-4 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#E50914] transition-all"
                   />
                   <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-2.5 pointer-events-none" />
                 </form>
@@ -186,7 +186,7 @@ export function Header() {
                             className="w-10 h-14 object-cover rounded bg-neutral-800 flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-semibold text-white group-hover:text-[#ef174f] truncate">
+                            <h4 className="text-sm font-semibold text-white group-hover:text-[#E50914] truncate">
                               {item.title}
                             </h4>
                             <div className="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
@@ -207,7 +207,7 @@ export function Header() {
                     <Link
                       to={`/search?q=${encodeURIComponent(searchQuery)}`}
                       onClick={() => setSearchOpen(false)}
-                      className="block text-center text-xs font-semibold text-[#ef174f] hover:underline p-2 border-t border-white/5 mt-1"
+                      className="block text-center text-xs font-semibold text-[#E50914] hover:underline p-2 border-t border-white/5 mt-1"
                     >
                       View all results for &quot;{searchQuery}&quot;
                     </Link>
@@ -234,7 +234,7 @@ export function Header() {
               >
                 <Bookmark className="w-5 h-5" />
                 {watchlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#ef174f] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow">
+                  <span className="absolute -top-1 -right-1 bg-[#E50914] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow">
                     {watchlist.length > 99 ? '99+' : watchlist.length}
                   </span>
                 )}
@@ -246,7 +246,7 @@ export function Header() {
                 title="Guest Streaming Profile"
               >
                 <span className="text-xs font-semibold text-neutral-300">VIP</span>
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#ef174f] to-amber-500 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#E50914] to-red-600 flex items-center justify-center text-white text-xs font-bold">
                   <User className="w-4 h-4" />
                 </div>
               </div>
@@ -275,7 +275,7 @@ export function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
-                className="w-full bg-[#151820] border border-white/15 focus:border-[#ef174f] text-sm text-white placeholder-neutral-500 rounded-lg pl-10 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#ef174f]"
+                className="w-full bg-[#151820] border border-white/15 focus:border-[#E50914] text-sm text-white placeholder-neutral-500 rounded-lg pl-10 pr-10 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#E50914]"
               />
               <Search className="w-5 h-5 text-neutral-400 absolute left-3 top-3 pointer-events-none" />
               {searchQuery && (
@@ -347,7 +347,7 @@ export function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-3 py-3 rounded-xl text-base font-semibold transition-colors ${
                         isActive
-                          ? 'bg-[#ef174f] text-white'
+                          ? 'bg-[#E50914] text-white'
                           : 'text-neutral-300 hover:text-white hover:bg-white/5'
                       }`}
                     >
@@ -365,10 +365,10 @@ export function Header() {
                   className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/5 text-neutral-200 font-semibold"
                 >
                   <div className="flex items-center gap-3">
-                    <Bookmark className="w-5 h-5 text-[#ef174f]" />
+                    <Bookmark className="w-5 h-5 text-[#E50914]" />
                     <span>Watchlist</span>
                   </div>
-                  <span className="bg-[#ef174f] text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                  <span className="bg-[#E50914] text-white text-xs px-2 py-0.5 rounded-full font-bold">
                     {watchlist.length}
                   </span>
                 </Link>
@@ -376,7 +376,7 @@ export function Header() {
             </div>
 
             <div className="pt-6 border-t border-white/10 text-xs text-neutral-500">
-              <p>FWATCH Platform</p>
+              <p>Tstream Platform</p>
               <p className="mt-1">Powered by TMDB Metadata API</p>
             </div>
           </div>

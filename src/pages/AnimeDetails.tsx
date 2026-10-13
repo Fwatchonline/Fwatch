@@ -1,21 +1,32 @@
-import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import {
   Play,
-  Star,
   Bookmark,
-  Calendar,
-  Clock,
+  Star,
   Film,
+  X,
+  Clock,
+  Calendar,
+  Globe,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Share2,
+  Flame,
+  Check,
+  Copy,
+  AlertCircle,
+  Eye,
+  Flag,
+  ExternalLink,
   Tv,
   Layers,
   Sparkles,
-  ArrowLeft,
-  X,
-  Share2,
   Users,
   TvMinimal,
-  ExternalLink,
 } from 'lucide-react';
 import {
   anilistService,
@@ -24,22 +35,36 @@ import {
   generateAnimeSlug,
 } from '../services/anilist';
 import { AnimeMedia } from '../types';
-import { AnimeCard } from '../components/AnimeCard';
 import { SEO } from '../components/SEO';
+import { AnimeCard } from '../components/AnimeCard';
+import { ReportModal } from '../components/ReportModal';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { slugifyCountry } from '../utils/countryHelper';
+import { slugify } from '../utils/slugify';
+import { tmdbService } from '../services/tmdb';
 
 export function AnimeDetails() {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [anime, setAnime] = useState<AnimeMedia | null>(null);
   const [loading, setLoading] = useState(true);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(false);
   const [activeEpisode, setActiveEpisode] = useState(1);
   const [selectedServer, setSelectedServer] = useState<'vidlink' | 'vidsrc' | '2embed'>('vidlink');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [realViews, setRealViews] = useState<number>(284);
 
-  const isWatchMode = searchParams.get('watch') === '1';
   const { watchlist, toggleWatchlist } = useWatchlist();
+  const castScrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to top on slug change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   useEffect(() => {
     let mounted = true;
@@ -50,10 +75,14 @@ export function AnimeDetails() {
 
     if (id) {
       anilistService.getAnimeById(id).then((res) => {
-        if (mounted) {
-          setAnime(res);
-          setLoading(false);
-        }
+        if (!mounted) return;
+        setAnime(res);
+        setLoading(false);
+
+        // Record real view count (+1 on each open)
+        tmdbService.recordView('anime', id).then((v) => {
+          if (mounted && v) setRealViews(v);
+        });
       });
     } else {
       setLoading(false);
@@ -64,13 +93,20 @@ export function AnimeDetails() {
     };
   }, [slug]);
 
+  // Handle URL watch param
+  useEffect(() => {
+    if (searchParams.get('watch') === '1') {
+      setShowPlayer(true);
+    }
+  }, [searchParams]);
+
   if (loading) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin mb-4" />
-        <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
-          Loading Anime Details from AniList...
-        </span>
+      <div className="min-h-[75vh] flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin shadow-lg shadow-red-900/30" />
+        <p className="text-xs font-bold text-neutral-400 tracking-wider animate-pulse">
+          Loading anime details...
+        </p>
       </div>
     );
   }
@@ -80,45 +116,81 @@ export function AnimeDetails() {
       <div className="text-center py-24 space-y-4 max-w-md mx-auto">
         <h2 className="text-2xl font-black text-white">Anime Not Found</h2>
         <p className="text-xs text-neutral-400">
-          The requested anime title could not be retrieved from AniList.
+          The requested anime could not be found or retrieved.
         </p>
         <Link
           to="/anime"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F5C518] text-black font-extrabold text-xs"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white font-extrabold text-xs transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ChevronLeft className="w-4 h-4" />
           <span>Return to Anime Catalog</span>
         </Link>
       </div>
     );
   }
 
-  const title = anime.title.english || anime.title.romaji || 'Anime';
-  const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
+  const title = anime.title.english || anime.title.romaji || 'Anime Title';
+  const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : '8.6';
   const isMovie = anime.format === 'MOVIE';
   const totalEpisodes = isMovie ? 1 : anime.episodes || 12;
+  const isSaved = watchlist.some((w) => w.tmdbId === anime.id && w.type === (isMovie ? 'movie' : 'tv'));
 
-  const isSaved = watchlist.some((w) => w.tmdbId === anime.id && w.type === 'tv');
+  const coverUrl =
+    anime.coverImage?.extraLarge ||
+    anime.coverImage?.large ||
+    'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500';
+
+  const backdropUrl = anime.bannerImage || coverUrl;
+
+  const studioName = anime.studios?.nodes?.[0]?.name || 'Toei Animation';
+  const studioSlug = slugify(studioName);
+
+  const countryName = 'Japan';
+  const countrySlug = slugifyCountry(countryName);
 
   const handleToggleWatchlist = () => {
     toggleWatchlist({
       id: `anime:${anime.id}`,
       tmdbId: anime.id,
-      type: 'tv',
+      type: isMovie ? 'movie' : 'tv',
       slug: generateAnimeSlug(anime.id, title),
       title,
       posterPath: anime.coverImage?.large || null,
       backdropPath: anime.bannerImage || null,
       voteAverage: anime.averageScore ? anime.averageScore / 10 : 8.5,
       releaseDate: anime.seasonYear ? `${anime.seasonYear}-01-01` : '2024-01-01',
-      genres: anime.genres.map((g, i) => ({ id: i + 1, name: g, slug: g.toLowerCase() })),
+      genres: anime.genres.map((g, i) => ({ id: i + 1, name: g, slug: slugify(g) })),
       overview: cleanDescription(anime.description) || '',
       voteCount: anime.popularity || 1000,
     });
   };
 
-  // Embed stream URLs
+  const handleShare = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
+
+  const scrollCast = (direction: 'left' | 'right') => {
+    if (castScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -350 : 350;
+      castScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   const getEmbedStreamUrl = () => {
+    if (isMovie) {
+      if (selectedServer === 'vidlink') {
+        return `https://vidlink.pro/anime/${anime.id}/1?primaryColor=F5C518`;
+      }
+      if (selectedServer === 'vidsrc') {
+        return `https://vidsrc.to/embed/anime/${anime.id}/1`;
+      }
+      return `https://2embed.cc/embed/anime/${anime.id}/1`;
+    }
+
     if (selectedServer === 'vidlink') {
       return `https://vidlink.pro/anime/${anime.id}/${activeEpisode}?primaryColor=F5C518`;
     }
@@ -129,44 +201,63 @@ export function AnimeDetails() {
   };
 
   return (
-    <div className="space-y-10 py-2">
+    <div className="space-y-12 pb-16">
       <SEO
-        title={`${title} - Watch Anime Online | T.Movie`}
+        title={`${title} (${isMovie ? 'Movie' : 'Series'}) - Watch Anime Online | Tstream`}
         description={
           cleanDescription(anime.description).slice(0, 160) ||
-          `Stream ${title} on T.Movie with English and Romaji subtitles.`
+          `Stream ${title} on Tstream with English and Romaji subtitles, full episodes and cast details.`
         }
-        ogImage={anime.bannerImage || anime.coverImage?.large}
+        ogImage={backdropUrl}
       />
 
-      {/* Back Link */}
-      <div>
-        <Link
-          to="/anime"
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Anime Catalog</span>
-        </Link>
+      {/* ------------------------------------------------------------- */}
+      {/* 1. TOP BREADCRUMB                                             */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex items-center gap-2 text-xs font-semibold text-neutral-400">
+        <Link to="/" className="hover:text-white transition-colors">Home</Link>
+        <span>/</span>
+        <Link to="/anime" className="hover:text-white transition-colors">Anime</Link>
+        <span>/</span>
+        <span className="text-neutral-500">{isMovie ? 'Anime Movie' : 'Anime Series'}</span>
+        <span>/</span>
+        <span className="text-[#E50914] truncate max-w-xs">{title}</span>
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* WATCH PLAYER SECTION (when active or watch=1)                 */}
+      {/* 2. STREAMING PLAYER (When toggled on)                          */}
       {/* ------------------------------------------------------------- */}
-      {isWatchMode && (
-        <div className="space-y-4">
-          <div className="relative aspect-video w-full rounded-3xl overflow-hidden bg-black border border-white/10 shadow-2xl">
+      {showPlayer && (
+        <div className="space-y-4 rounded-3xl overflow-hidden bg-black/90 p-4 border border-white/10 shadow-2xl">
+          <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <h3 className="text-sm font-black text-white">
+                Now Playing: {title} {!isMovie && `- Episode ${activeEpisode}`}
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPlayer(false)}
+              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+              title="Close Player"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl">
             <iframe
               src={getEmbedStreamUrl()}
-              title={`Watch ${title} Episode ${activeEpisode}`}
+              title={`Watch ${title}`}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
           </div>
 
-          {/* Player Bar: Episode switcher & Server selector */}
-          <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-[#16171E] border border-white/5">
+          {/* Server Switcher Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-xl bg-[#16171E] border border-white/5">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-neutral-400">Stream Server:</span>
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/10">
@@ -177,7 +268,7 @@ export function AnimeDetails() {
                     onClick={() => setSelectedServer(srv)}
                     className={`px-3 py-1 rounded-lg text-xs font-extrabold uppercase transition-all cursor-pointer ${
                       selectedServer === srv
-                        ? 'bg-[#F5C518] text-black shadow'
+                        ? 'bg-[#E50914] text-white shadow shadow-red-900/40'
                         : 'text-neutral-400 hover:text-white'
                     }`}
                   >
@@ -188,166 +279,148 @@ export function AnimeDetails() {
             </div>
 
             <div className="text-xs text-neutral-400">
-              Playing <span className="text-white font-bold">{isMovie ? 'Full Movie' : `Episode ${activeEpisode} of ${totalEpisodes}`}</span>
+              <span className="text-white font-bold">
+                {isMovie ? 'Full Movie Stream' : `Episode ${activeEpisode} of ${totalEpisodes}`}
+              </span>
             </div>
           </div>
-
-          {/* Episode List Selector for TV Series */}
-          {!isMovie && totalEpisodes > 1 && (
-            <div className="p-5 rounded-2xl bg-[#16171E] border border-white/5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-                  <TvMinimal className="w-4 h-4 text-[#F5C518]" />
-                  <span>Select Episode ({totalEpisodes})</span>
-                </h3>
-                <span className="text-[11px] text-neutral-400">Subbed &amp; Dubbed Available</span>
-              </div>
-
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 max-h-48 overflow-y-auto pr-1">
-                {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((epNum) => {
-                  const isActive = activeEpisode === epNum;
-                  return (
-                    <button
-                      key={epNum}
-                      type="button"
-                      onClick={() => setActiveEpisode(epNum)}
-                      className={`py-2 px-1 text-center rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        isActive
-                          ? 'bg-[#F5C518] text-black font-extrabold shadow-md shadow-[#F5C518]/25 scale-105'
-                          : 'bg-black/40 text-neutral-300 hover:bg-white/10 hover:text-white border border-white/5'
-                      }`}
-                    >
-                      Ep {epNum}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* HERO BANNER & MAIN OVERVIEW                                   */}
+      {/* 3. HERO SECTION (100% Matching MovieDetails & TVDetails)      */}
       {/* ------------------------------------------------------------- */}
-      <div className="relative rounded-3xl overflow-hidden bg-[#16171E] border border-white/10 shadow-2xl p-6 sm:p-10">
-        {/* Background Backdrop */}
-        {anime.bannerImage && (
-          <div className="absolute inset-0 z-0">
-            <img
-              src={anime.bannerImage}
-              alt={title}
-              className="w-full h-full object-cover opacity-25 filter blur-xs"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#16171E] via-[#16171E]/90 to-transparent" />
-          </div>
-        )}
+      <div className="relative rounded-3xl overflow-hidden bg-[#16171E] border border-white/10 shadow-2xl">
+        {/* Full Cinematic Backdrop */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <img
+            src={backdropUrl}
+            alt={title}
+            className="w-full h-full object-cover object-center filter blur-xs scale-105 opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#16171E] via-[#16171E]/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#16171E] via-[#16171E]/90 to-transparent" />
+        </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start">
-          {/* Cover Poster */}
-          <div className="w-44 sm:w-56 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden bg-[#0E0F12] border-2 border-white/10 shadow-2xl shadow-black/80">
+        <div className="relative z-10 p-6 sm:p-10 lg:p-12 flex flex-col md:flex-row gap-8 lg:gap-10 items-start">
+          {/* Poster Column */}
+          <div className="w-48 sm:w-60 md:w-64 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden bg-[#0A0B0E] border-2 border-white/10 shadow-2xl shadow-black relative group mx-auto md:mx-0">
             <img
-              src={
-                anime.coverImage?.extraLarge ||
-                anime.coverImage?.large ||
-                'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500&auto=format&fit=crop&q=80'
-              }
+              src={coverUrl}
               alt={title}
               className="w-full h-full object-cover"
             />
-          </div>
 
-          {/* Overview Info */}
-          <div className="flex-1 space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-[#F5C518] text-black text-[10px] font-black uppercase tracking-wider">
-                {anime.format}
+            {/* Poster IMDb/AniList badge */}
+            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-black/85 backdrop-blur-md border border-white/15 text-xs font-bold text-white shadow-lg">
+              <span className="text-[10px] font-black px-1.5 py-0.2 rounded bg-[#E50914] text-white">
+                AniList
               </span>
-
-              {score && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-black/60 border border-[#F5C518]/40 text-[#F5C518] text-xs font-black">
-                  <Star className="w-3.5 h-3.5 fill-[#F5C518]" />
-                  <span>{score} AniList</span>
-                </span>
-              )}
-
-              {anime.status && (
-                <span className="px-2.5 py-0.5 rounded-md bg-black/50 border border-white/10 text-neutral-300 text-xs font-semibold">
-                  {anime.status}
-                </span>
-              )}
-
-              {anime.seasonYear && (
-                <span className="px-2.5 py-0.5 rounded-md bg-black/50 border border-white/10 text-neutral-300 text-xs font-semibold">
-                  {anime.season ? `${anime.season} ` : ''}{anime.seasonYear}
-                </span>
-              )}
+              <span className="font-extrabold text-neutral-100">{score}</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              {title}
-            </h1>
-
-            {anime.title.romaji && anime.title.english && anime.title.romaji !== anime.title.english && (
-              <p className="text-sm text-[#F5C518] font-semibold italic">
-                {anime.title.romaji}
-              </p>
-            )}
-
-            {/* Quick Metadata Row */}
-            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-neutral-300 pt-1">
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-[#F5C518]" />
-                <span>{isMovie ? `${anime.duration || 100} minutes` : `${totalEpisodes} Episodes`}</span>
-              </span>
-
-              {anime.studios?.nodes?.[0] && (
-                <span className="flex items-center gap-1.5">
-                  <Film className="w-4 h-4 text-[#F5C518]" />
-                  <span>Studio: {anime.studios.nodes[0].name}</span>
-                </span>
-              )}
-            </div>
-
-            {/* Genres */}
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {anime.genres.map((g) => (
-                <span
-                  key={g}
-                  className="px-3 py-1 rounded-xl bg-white/10 border border-white/10 text-xs font-bold text-neutral-200"
-                >
-                  {g}
-                </span>
-              ))}
-            </div>
-
-            {/* Synopsis */}
-            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-3xl whitespace-pre-line pt-2">
-              {cleanDescription(anime.description) ||
-                'No detailed synopsis provided for this anime.'}
-            </p>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-4">
+            {/* Floating Quick Play Overlay on Poster */}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <button
                 type="button"
                 onClick={() => {
-                  setSearchParams({ watch: '1' });
+                  setShowPlayer(true);
                   window.scrollTo({ top: 80, behavior: 'smooth' });
                 }}
-                className="py-3 px-7 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+                className="w-14 h-14 rounded-full bg-[#E50914] text-white flex items-center justify-center shadow-xl shadow-red-900/40 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                title="Play Now"
               >
-                <Play className="w-4 h-4 fill-black" />
-                <span>WATCH NOW</span>
+                <Play className="w-6 h-6 fill-white ml-0.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Details Column */}
+          <div className="flex-1 space-y-5">
+            {/* Top Metric Row: Rating, Year, Views */}
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 text-white font-bold">
+                <Star className="w-3.5 h-3.5 fill-[#F5C518] text-[#F5C518]" />
+                <span className="text-amber-400 font-black text-sm">{score}</span>
+                <span className="text-neutral-400">/ 10</span>
+              </div>
+
+              {/* Real Views Count Pill (Real +1 on each view) */}
+              <div
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold"
+                title="Real persistent view count (+1 on each open)"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{realViews.toLocaleString()} views</span>
+              </div>
+
+              {anime.seasonYear && (
+                <span className="px-2.5 py-1 rounded-lg bg-[#111318] border border-white/10 text-neutral-300 font-bold">
+                  {anime.seasonYear}
+                </span>
+              )}
+
+              <span className="px-2.5 py-1 rounded-lg bg-[#111318] border border-white/10 text-neutral-300 font-bold">
+                {isMovie ? `${anime.duration || 105} min` : `${totalEpisodes} Episodes`}
+              </span>
+
+              {/* Clickable Country Pill */}
+              <Link
+                to={`/country/${countrySlug}`}
+                className="px-2.5 py-1 rounded-lg bg-[#111318] hover:bg-[#1C202A] border border-white/10 hover:border-white/30 text-neutral-300 hover:text-white font-semibold transition-colors cursor-pointer"
+                title={`Browse anime from ${countryName}`}
+              >
+                🇯🇵 {countryName}
+              </Link>
+            </div>
+
+            {/* Title */}
+            <div>
+              <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
+                {title}
+              </h1>
+              {anime.title.romaji && anime.title.english && anime.title.romaji !== anime.title.english && (
+                <p className="text-sm sm:text-base text-[#E50914] font-semibold italic mt-1">
+                  {anime.title.romaji}
+                </p>
+              )}
+            </div>
+
+            {/* Genre Chips */}
+            <div className="flex flex-wrap items-center gap-2">
+              {anime.genres.map((g) => (
+                <Link
+                  key={g}
+                  to={`/genre/${slugify(g)}`}
+                  className="px-3 py-1 rounded-full bg-[#281318] hover:bg-[#E50914] border border-red-500/40 hover:border-[#E50914] text-red-300 hover:text-white text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                >
+                  {g}
+                </Link>
+              ))}
+            </div>
+
+            {/* Action Buttons: Watch Now, Trailer, Watchlist, Share, Report */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPlayer(true);
+                  window.scrollTo({ top: 80, behavior: 'smooth' });
+                }}
+                className="px-7 py-3 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-red-900/40 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                <Play className="w-4 h-4 fill-white" />
+                <span>{isMovie ? 'WATCH MOVIE' : 'WATCH SERIES'}</span>
               </button>
 
               {anime.trailer?.id && anime.trailer.site === 'youtube' && (
                 <button
                   type="button"
                   onClick={() => setShowTrailer(true)}
-                  className="py-3 px-6 rounded-xl bg-black/60 hover:bg-black/80 border border-white/20 text-white text-xs sm:text-sm font-bold transition-colors flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-3 rounded-xl bg-black/60 hover:bg-black/80 border border-white/20 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer"
                 >
-                  <Film className="w-4 h-4 text-[#F5C518]" />
+                  <Film className="w-4 h-4 text-neutral-300" />
                   <span>Watch Trailer</span>
                 </button>
               )}
@@ -355,39 +428,219 @@ export function AnimeDetails() {
               <button
                 type="button"
                 onClick={handleToggleWatchlist}
-                className={`py-3 px-5 rounded-xl border text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
                   isSaved
-                    ? 'bg-[#F5C518]/20 border-[#F5C518] text-[#F5C518]'
-                    : 'bg-black/40 border-white/20 text-white hover:bg-white/10'
+                    ? 'bg-[#E50914] border-[#E50914] text-white shadow-md shadow-red-900/40'
+                    : 'bg-black/60 border-white/15 text-neutral-300 hover:text-white hover:bg-white/10'
                 }`}
+                title={isSaved ? 'In Watchlist' : 'Add to Watchlist'}
               >
-                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#F5C518]' : ''}`} />
-                <span>{isSaved ? 'In Watchlist' : 'Add to Watchlist'}</span>
+                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-white' : ''}`} />
               </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                className="p-3 rounded-xl bg-black/60 hover:bg-white/10 border border-white/15 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                title="Share Link"
+              >
+                {shareCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReportModalOpen(true)}
+                className="p-3 rounded-xl bg-black/60 hover:bg-white/10 border border-white/15 text-neutral-300 hover:text-red-400 transition-colors cursor-pointer"
+                title="Report Issue"
+              >
+                <Flag className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* ------------------------------------------------------------- */}
+            {/* 4. COMPREHENSIVE METADATA GRID                                */}
+            {/* ------------------------------------------------------------- */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 rounded-2xl bg-[#0E0F14] border border-white/5 text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">TYPE</span>
+                <span className="font-semibold text-white mt-0.5 block">{isMovie ? 'Anime Movie' : 'Anime Series'}</span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">COUNTRY</span>
+                <Link
+                  to={`/country/${countrySlug}`}
+                  className="font-semibold text-white hover:text-[#E50914] mt-0.5 block truncate hover:underline"
+                  title={`Browse all titles filmed in ${countryName}`}
+                >
+                  {countryName}
+                </Link>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">RELEASE</span>
+                <span className="font-semibold text-white mt-0.5 block">
+                  {anime.seasonYear ? `${anime.season ? anime.season + ' ' : ''}${anime.seasonYear}` : '2024'}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">STATUS</span>
+                <span className="font-semibold text-white mt-0.5 block">{anime.status || 'Finished Airing'}</span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">STUDIO</span>
+                <Link
+                  to={`/studio/${studioSlug}`}
+                  className="font-semibold text-white hover:text-[#E50914] mt-0.5 block truncate hover:underline"
+                  title={`Browse anime produced by ${studioName}`}
+                >
+                  {studioName}
+                </Link>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">LANGUAGE</span>
+                <span className="font-semibold text-white mt-0.5 block">JA / Japanese</span>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">PRODUCTION</span>
+                <Link
+                  to={`/studio/${studioSlug}`}
+                  className="font-semibold text-white hover:text-[#E50914] mt-0.5 block truncate hover:underline"
+                  title={`Browse anime produced by ${studioName}`}
+                >
+                  {studioName}
+                </Link>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase font-bold text-neutral-500 block">REAL VIEWS</span>
+                <span className="font-semibold text-emerald-400 mt-0.5 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {realViews.toLocaleString()} views
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* CHARACTERS & VOICE CAST                                       */}
+      {/* 5. EPISODES SECTION (For Anime Series - 100% Matching TVDetails) */}
+      {/* ------------------------------------------------------------- */}
+      {!isMovie && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+              <Tv className="w-5 h-5 text-[#E50914]" />
+              <span>Episodes ({totalEpisodes})</span>
+            </h2>
+            <span className="text-xs text-neutral-400 font-medium">
+              Japanese Audio with English Subtitles
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((epNum) => {
+              const isActive = activeEpisode === epNum;
+              return (
+                <div
+                  key={epNum}
+                  onClick={() => {
+                    setActiveEpisode(epNum);
+                    setShowPlayer(true);
+                    window.scrollTo({ top: 80, behavior: 'smooth' });
+                  }}
+                  className={`group relative rounded-2xl overflow-hidden p-3.5 border transition-all cursor-pointer flex flex-col justify-between min-h-[110px] ${
+                    isActive
+                      ? 'bg-[#1C1F2B] border-[#E50914] shadow-lg shadow-red-900/30 scale-102'
+                      : 'bg-[#13151D] hover:bg-[#1A1D27] border-white/5 hover:border-white/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-black ${isActive ? 'text-[#E50914]' : 'text-neutral-300'}`}>
+                      EPISODE {epNum}
+                    </span>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                      isActive ? 'bg-[#E50914]' : 'bg-black/60 group-hover:bg-[#E50914]'
+                    }`}>
+                      <Play className="w-3.5 h-3.5 fill-white text-transparent ml-0.5 transition-colors" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold text-white truncate group-hover:text-[#E50914] transition-colors">
+                      Episode {epNum}
+                    </h4>
+                    <span className="text-[10px] text-neutral-400">24 min • HD</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 6. STORYLINE & SYNOPSIS                                       */}
+      {/* ------------------------------------------------------------- */}
+      <div className="space-y-3 p-6 rounded-3xl bg-[#14161E] border border-white/5 shadow-md">
+        <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+          <Film className="w-4 h-4 text-[#E50914]" />
+          <span>Storyline &amp; Synopsis</span>
+        </h3>
+        <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-4xl whitespace-pre-line">
+          {cleanDescription(anime.description) ||
+            'Experience this compelling anime narrative featuring rich character dynamics, extraordinary world-building, and stellar production craft.'}
+        </p>
+      </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* 7. CHARACTERS & VOICE CAST CAROUSEL                           */}
       {/* ------------------------------------------------------------- */}
       {anime.characters?.edges && anime.characters.edges.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-            <Users className="w-5 h-5 text-[#F5C518]" />
-            <h2 className="text-xl font-extrabold text-white">Characters &amp; Voice Cast</h2>
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+              <Users className="w-5 h-5 text-[#E50914]" />
+              <span>Characters &amp; Voice Cast</span>
+            </h2>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollCast('left')}
+                className="w-8 h-8 rounded-full bg-[#181B24] hover:bg-white/10 text-white flex items-center justify-center border border-white/10 transition-colors cursor-pointer"
+                aria-label="Previous Cast"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCast('right')}
+                className="w-8 h-8 rounded-full bg-[#181B24] hover:bg-white/10 text-white flex items-center justify-center border border-white/10 transition-colors cursor-pointer"
+                aria-label="Next Cast"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div
+            ref={castScrollRef}
+            className="flex items-start gap-4 overflow-x-auto no-scrollbar scroll-smooth py-2"
+          >
             {anime.characters.edges.map((edge) => {
               const char = edge.node;
               return (
                 <div
                   key={char.id}
-                  className="p-3 rounded-2xl bg-[#16171E] border border-white/5 flex flex-col items-center text-center space-y-2 group"
+                  className="flex-shrink-0 w-32 p-3 rounded-2xl bg-[#14161E] border border-white/5 flex flex-col items-center text-center space-y-2 group hover:border-[#E50914]/40 transition-all"
                 >
-                  <div className="w-20 h-20 rounded-full overflow-hidden bg-black/40 border border-white/10 group-hover:border-[#F5C518]/40 transition-colors">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-black/40 border border-white/10 group-hover:scale-105 transition-transform">
                     <img
                       src={
                         char.image?.large ||
@@ -395,13 +648,15 @@ export function AnimeDetails() {
                         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'
                       }
                       alt={char.name.full}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      className="w-full h-full object-cover"
                     />
                   </div>
 
-                  <div>
-                    <h4 className="text-xs font-bold text-white line-clamp-1">{char.name.full}</h4>
-                    <span className="text-[10px] text-[#F5C518] uppercase font-bold tracking-wider">
+                  <div className="w-full">
+                    <h4 className="text-xs font-bold text-white truncate" title={char.name.full}>
+                      {char.name.full}
+                    </h4>
+                    <span className="text-[10px] text-[#E50914] uppercase font-bold tracking-wider block truncate">
                       {edge.role || 'Character'}
                     </span>
                   </div>
@@ -413,16 +668,16 @@ export function AnimeDetails() {
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* RECOMMENDED ANIME                                             */}
+      {/* 8. RECOMMENDED ANIME                                          */}
       {/* ------------------------------------------------------------- */}
       {anime.recommendations?.nodes && anime.recommendations.nodes.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#F5C518]" />
-              <h2 className="text-xl font-extrabold text-white">Recommended Anime</h2>
-            </div>
-            <Link to="/anime" className="text-xs font-bold text-[#F5C518] hover:underline">
+            <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#E50914]" />
+              <span>You May Also Like</span>
+            </h2>
+            <Link to="/anime" className="text-xs font-bold text-[#E50914] hover:underline">
               View All
             </Link>
           </div>
@@ -432,62 +687,35 @@ export function AnimeDetails() {
               .filter((n) => n.mediaRecommendation)
               .slice(0, 6)
               .map((n) => {
-                const rec = n.mediaRecommendation!;
-                const recSlug = generateAnimeSlug(rec.id, rec.title.english || rec.title.romaji);
-                return (
-                  <Link
-                    key={rec.id}
-                    to={`/anime/${recSlug}`}
-                    className="group relative flex flex-col transition-all"
-                  >
-                    <div className="relative aspect-[2/3] w-full rounded-2xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#F5C518]/60 transition-all duration-300">
-                      <img
-                        src={rec.coverImage?.large || rec.coverImage?.medium}
-                        alt={rec.title.english || rec.title.romaji}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                      <div className="absolute top-2 left-2">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-black/70 text-[#F5C518] border border-white/10">
-                          {rec.format}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-2 space-y-0.5">
-                      <h4 className="text-xs font-bold text-white group-hover:text-[#F5C518] transition-colors line-clamp-1">
-                        {rec.title.english || rec.title.romaji}
-                      </h4>
-                    </div>
-                  </Link>
-                );
+                const rec = n.mediaRecommendation as unknown as AnimeMedia;
+                return <AnimeCard key={rec.id} anime={rec} />;
               })}
           </div>
         </div>
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* TRAILER POPUP MODAL                                           */}
+      {/* 9. TRAILER MODAL                                              */}
       {/* ------------------------------------------------------------- */}
-      {showTrailer && anime.trailer?.id && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-4xl rounded-3xl overflow-hidden bg-[#0E0F12] border border-white/15 shadow-2xl">
-            <div className="p-4 flex items-center justify-between border-b border-white/10">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Film className="w-4 h-4 text-[#F5C518]" />
-                <span>{title} - Official Trailer</span>
+      {showTrailer && anime.trailer?.id && anime.trailer.site === 'youtube' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-4xl rounded-3xl overflow-hidden bg-[#16171E] border border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                <Film className="w-4 h-4 text-[#E50914]" />
+                <span>{title} — Official Trailer</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setShowTrailer(false)}
-                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-
             <div className="aspect-video w-full bg-black">
               <iframe
-                src={`https://www.youtube.com/embed/${anime.trailer.id}?autoplay=1`}
+                src={`https://www.youtube-nocookie.com/embed/${anime.trailer.id}?autoplay=1`}
                 title={`${title} Trailer`}
                 className="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -497,6 +725,14 @@ export function AnimeDetails() {
           </div>
         </div>
       )}
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        title={title}
+        serverId={selectedServer}
+      />
     </div>
   );
 }

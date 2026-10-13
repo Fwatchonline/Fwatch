@@ -103,8 +103,8 @@ export function NewEpisodes() {
   return (
     <div className="space-y-8 py-2">
       <SEO
-        title="New Episodes - Recently Aired TV Shows | T.Movie"
-        description="Stream the latest aired television episodes and newest season premieres from TMDB. Watch fresh episodes online in high quality on T.Movie."
+        title="New Episodes - Recently Aired TV Shows | Tstream"
+        description="Stream the latest aired television episodes and newest season premieres from TMDB. Watch fresh episodes online in high quality on Tstream."
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'New Episodes', item: '/episodes' },
@@ -115,8 +115,8 @@ export function NewEpisodes() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#F5C518] text-black text-[11px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md shadow-[#F5C518]/25">
-              <Sparkles className="w-3 h-3 fill-black" />
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E50914] text-white text-[11px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md shadow-red-900/40">
+              <Sparkles className="w-3 h-3 fill-white" />
               <span>Live TMDB Feed</span>
             </span>
             <span className="text-xs text-neutral-400 font-medium">
@@ -134,7 +134,7 @@ export function NewEpisodes() {
 
         {totalResults > 0 && (
           <div className="self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-[#16171E] border border-white/10 text-xs font-bold text-neutral-300">
-            <span className="text-[#F5C518] font-extrabold mr-1">
+            <span className="text-[#E50914] font-extrabold mr-1">
               {totalResults.toLocaleString()}
             </span>
             <span>Episodes Available</span>
@@ -168,16 +168,16 @@ export function NewEpisodes() {
           {/* Hero Content */}
           <div className="relative z-10 max-w-2xl space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-[#F5C518] text-black text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                <Flame className="w-3 h-3 fill-black" />
+              <span className="px-2.5 py-0.5 rounded-md bg-[#E50914] text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow shadow-red-900/40">
+                <Flame className="w-3 h-3 fill-white" />
                 <span>FEATURED PREMIERE</span>
               </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[#F5C518] border border-white/10 text-[11px] font-black tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[#E50914] border border-white/10 text-[11px] font-black tracking-wider">
                 S{String(heroEpisode.seasonNumber).padStart(2, '0')}E{String(heroEpisode.episodeNumber).padStart(2, '0')}
               </span>
               {heroEpisode.airDate && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-neutral-300 text-[11px] font-bold">
-                  <Calendar className="w-3 h-3 text-[#F5C518]" />
+                  <Calendar className="w-3 h-3 text-[#E50914]" />
                   <span>{formatDate(heroEpisode.airDate)}</span>
                 </span>
               )}
@@ -190,7 +190,7 @@ export function NewEpisodes() {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-extrabold text-[#F5C518] uppercase tracking-wider">
+              <h3 className="text-sm sm:text-base font-extrabold text-[#E50914] uppercase tracking-wider">
                 {heroEpisode.showTitle}
               </h3>
               <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight drop-shadow-md">
@@ -200,7 +200,7 @@ export function NewEpisodes() {
 
             <p className="text-xs sm:text-sm text-neutral-300 line-clamp-2 max-w-xl leading-relaxed">
               {heroEpisode.overview ||
-                'Stream this high-stakes television episode with multiple direct HLS streaming mirrors and rich subtitle tracks.'}
+                'Stream this high-stakes television episode with multiple direct streaming mirrors and rich subtitle tracks.'}
             </p>
 
             {/* Action Buttons */}
@@ -208,13 +208,11 @@ export function NewEpisodes() {
               <button
                 type="button"
                 onClick={() =>
-                  navigate(
-                    `/watch/tv/${heroEpisode.showSlug}/season/${heroEpisode.seasonNumber}/episode/${heroEpisode.episodeNumber}`
-                  )
+                  navigate(`/tv/${heroEpisode.showSlug}`)
                 }
-                className="py-2.5 px-6 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+                className="py-2.5 px-6 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
               >
-                <Play className="w-4 h-4 fill-black" />
+                <Play className="w-4 h-4 fill-white" />
                 <span>WATCH EPISODE NOW</span>
               </button>
 
@@ -223,7 +221,7 @@ export function NewEpisodes() {
                 onClick={() => navigate(`/tv/${heroEpisode.showSlug}`)}
                 className="py-2.5 px-5 rounded-xl bg-black/50 hover:bg-black/70 border border-white/20 text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
               >
-                <Tv className="w-4 h-4 text-[#F5C518]" />
+                <Tv className="w-4 h-4 text-neutral-300" />
                 <span>View Full Series</span>
               </button>
             </div>
@@ -240,7 +238,7 @@ export function NewEpisodes() {
             onClick={() => setActiveTab('all')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'all'
-                ? 'bg-[#F5C518] text-black font-extrabold shadow-md shadow-[#F5C518]/20'
+                ? 'bg-[#E50914] text-white font-extrabold shadow-md shadow-red-900/40'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -252,7 +250,7 @@ export function NewEpisodes() {
             onClick={() => setActiveTab('this_week')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'this_week'
-                ? 'bg-[#F5C518] text-black font-extrabold shadow-md shadow-[#F5C518]/20'
+                ? 'bg-[#E50914] text-white font-extrabold shadow-md shadow-red-900/40'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -264,7 +262,7 @@ export function NewEpisodes() {
             onClick={() => setActiveTab('today')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'today'
-                ? 'bg-[#F5C518] text-black font-extrabold shadow-md shadow-[#F5C518]/20'
+                ? 'bg-[#E50914] text-white font-extrabold shadow-md shadow-red-900/40'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -282,7 +280,7 @@ export function NewEpisodes() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by series or episode..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-black/40 border border-white/10 focus:border-[#F5C518] text-xs text-white placeholder-neutral-500 outline-hidden transition-all"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-black/40 border border-white/10 focus:border-[#E50914] text-xs text-white placeholder-neutral-500 outline-hidden transition-all"
             />
           </div>
 
@@ -292,7 +290,7 @@ export function NewEpisodes() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-bold text-neutral-300 focus:border-[#F5C518] outline-hidden cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-bold text-neutral-300 focus:border-[#E50914] outline-hidden cursor-pointer"
             >
               <option value="newest">Newest Air Date</option>
               <option value="rating">Highest Rated</option>
@@ -305,7 +303,7 @@ export function NewEpisodes() {
       {/* Content Grid */}
       {loading ? (
         <div className="py-24 flex flex-col items-center justify-center gap-3">
-          <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin" />
           <p className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
             Fetching latest aired episodes from TMDB...
           </p>
@@ -326,7 +324,7 @@ export function NewEpisodes() {
                 setSearchQuery('');
                 setActiveTab('all');
               }}
-              className="px-4 py-2 rounded-xl bg-[#F5C518] text-black text-xs font-extrabold hover:bg-[#E5B508] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#E50914] text-white text-xs font-extrabold hover:bg-[#B81D24] transition-colors cursor-pointer"
             >
               Reset Filters
             </button>

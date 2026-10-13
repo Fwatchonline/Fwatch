@@ -36,7 +36,7 @@ export function ActorCard({ person, className }: ActorCardProps) {
       title={name}
     >
       {/* Portrait Photo Container */}
-      <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#F5C518]/60 group-hover:shadow-xl group-hover:shadow-[#F5C518]/20 transition-all duration-300 shadow-md">
+      <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#E50914]/60 group-hover:shadow-xl group-hover:shadow-red-900/20 transition-all duration-300 shadow-md">
         {imgError || !rawPath ? (
           <div className="w-full h-full bg-gradient-to-br from-[#1c202a] to-[#0e1015] flex flex-col items-center justify-center text-neutral-400 p-2">
             <span className="text-xl sm:text-2xl font-black text-white/80 tracking-wider">
@@ -62,7 +62,7 @@ export function ActorCard({ person, className }: ActorCardProps) {
 
       {/* Actor Info Below Poster */}
       <div className="mt-2 space-y-0.5 text-center px-1">
-        <h4 className="text-xs sm:text-sm font-bold text-neutral-100 group-hover:text-[#F5C518] transition-colors truncate">
+        <h4 className="text-xs sm:text-sm font-bold text-neutral-100 group-hover:text-[#E50914] transition-colors truncate">
           {name}
         </h4>
         <p className="text-[11px] text-neutral-400 truncate">

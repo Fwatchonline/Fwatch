@@ -13,7 +13,7 @@ export function SocialShareBanner() {
   };
 
   const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
-  const shareText = encodeURIComponent('Watch trending movies and TV series in HD for free on FWATCH!');
+  const shareText = encodeURIComponent('Watch trending movies and TV series in HD for free on Tstream!');
 
   const socialChannels = [
     {
@@ -72,13 +72,13 @@ export function SocialShareBanner() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-6">
       <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-[#12151c] via-[#171b24] to-[#12151c] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#F5C518]/15 border border-[#F5C518]/30 flex items-center justify-center text-[#F5C518] flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-red-950/60 border border-red-500/30 flex items-center justify-center text-[#E50914] flex-shrink-0">
             <Share2 className="w-4 h-4" />
           </div>
           <div>
             <div className="text-sm font-bold text-white flex items-center gap-2">
-              <span>Share T.Movie with your friends</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-[#F5C518] text-black font-black uppercase">
+              <span>Share Tstream with your friends</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-[#E50914] text-white font-black uppercase shadow-sm">
                 Support Us
               </span>
             </div>

@@ -96,18 +96,18 @@ export function HeroSplit({ items }: HeroSplitProps) {
           <div className="flex items-center gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate(watchUrl)}
-              className="py-2.5 px-6 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer"
+              onClick={() => navigate(detailUrl)}
+              className="py-2.5 px-6 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
             >
-              <Play className="w-4 h-4 fill-black" />
+              <Play className="w-4 h-4 fill-white" />
               <span>WATCH</span>
             </button>
 
             <Link
               to={detailUrl}
-              className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-[#F5C518]/40 hover:border-[#F5C518] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
+              className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-white/20 hover:border-[#E50914] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <Info className="w-4 h-4 text-[#F5C518]" />
+              <Info className="w-4 h-4 text-neutral-300" />
               <span>Details &amp; Trailer</span>
             </Link>
           </div>
@@ -118,14 +118,14 @@ export function HeroSplit({ items }: HeroSplitProps) {
           <button
             type="button"
             onClick={prevHero}
-            className="w-9 h-9 rounded-full bg-black/60 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-colors shadow cursor-pointer"
+            className="w-9 h-9 rounded-full bg-black/60 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-colors shadow cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             type="button"
             onClick={nextHero}
-            className="w-9 h-9 rounded-full bg-black/60 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-colors shadow cursor-pointer"
+            className="w-9 h-9 rounded-full bg-black/60 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-colors shadow cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

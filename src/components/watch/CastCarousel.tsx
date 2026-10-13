@@ -20,12 +20,12 @@ export function CastCarousel({ cast = [] }: CastCarouselProps) {
     <div className="rounded-2xl bg-[#111318] border border-white/[0.07] p-5 sm:p-6 shadow-xl space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs font-bold text-[#A1A7B5] uppercase tracking-wider">
-          <Users className="w-3.5 h-3.5 text-[#F5C518]" />
+          <Users className="w-3.5 h-3.5 text-[#E50914]" />
           <span>Cast & Characters</span>
         </div>
         <Link
           to="/people"
-          className="text-xs font-semibold text-[#F5C518] hover:text-[#FFD633] transition-colors flex items-center gap-0.5"
+          className="text-xs font-semibold text-[#E50914] hover:text-[#B81D24] transition-colors flex items-center gap-0.5"
         >
           <span>All Artists</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -42,7 +42,7 @@ export function CastCarousel({ cast = [] }: CastCarouselProps) {
               to={`/people`}
               className="group flex items-center gap-2.5 p-2 rounded-xl bg-[#0D0F14] border border-white/5 hover:border-white/20 hover:bg-[#161922] transition-all"
             >
-              <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 bg-[#161922] border border-white/10 group-hover:border-[#F5C518] transition-colors">
+              <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 bg-[#161922] border border-white/10 group-hover:border-[#E50914] transition-colors">
                 <img
                   src={getTMDBImageUrl(actor.profilePath, 'w300', 'avatar')}
                   alt={actor.name}
@@ -52,7 +52,7 @@ export function CastCarousel({ cast = [] }: CastCarouselProps) {
               </div>
 
               <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-bold text-white group-hover:text-[#F5C518] transition-colors truncate">
+                <h4 className="text-xs font-bold text-white group-hover:text-[#E50914] transition-colors truncate">
                   {actor.name}
                 </h4>
                 <p className="text-[11px] text-[#707684] truncate">

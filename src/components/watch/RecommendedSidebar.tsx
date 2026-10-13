@@ -19,9 +19,9 @@ export function RecommendedSidebar({ items = [], type = 'movie' }: RecommendedSi
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
           {isMovie ? (
-            <Film className="w-4 h-4 text-[#F5C518]" />
+            <Film className="w-4 h-4 text-[#E50914]" />
           ) : (
-            <Tv className="w-4 h-4 text-[#F5C518]" />
+            <Tv className="w-4 h-4 text-[#E50914]" />
           )}
           <h3 className="font-extrabold text-sm sm:text-base text-white tracking-wide">
             Recommended
@@ -29,7 +29,7 @@ export function RecommendedSidebar({ items = [], type = 'movie' }: RecommendedSi
         </div>
         <Link
           to={isMovie ? '/movies' : '/tv'}
-          className="text-xs font-bold text-[#F5C518] hover:text-[#FFD633] transition-colors flex items-center gap-0.5"
+          className="text-xs font-bold text-[#E50914] hover:text-[#B81D24] transition-colors flex items-center gap-0.5"
         >
           <span>See All</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -62,7 +62,7 @@ export function RecommendedSidebar({ items = [], type = 'movie' }: RecommendedSi
 
               {/* Info */}
               <div className="flex-1 min-w-0 py-0.5">
-                <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-[#F5C518] transition-colors truncate">
+                <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-[#E50914] transition-colors truncate">
                   {item.title}
                 </h4>
 

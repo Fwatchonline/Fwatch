@@ -45,7 +45,7 @@ export function ContentRow({
           {viewAllLink && (
             <Link
               to={viewAllLink}
-              className="text-xs sm:text-sm font-bold text-[#F5C518] hover:text-[#E5B508] transition-colors flex items-center gap-1 group"
+              className="text-xs sm:text-sm font-bold text-[#E50914] hover:text-[#B81D24] transition-colors flex items-center gap-1 group"
             >
               <span>View All</span>
               <span className="transform group-hover:translate-x-0.5 transition-transform">→</span>
@@ -57,7 +57,7 @@ export function ContentRow({
             <button
               type="button"
               onClick={() => handleScroll('left')}
-              className="p-1.5 rounded-lg bg-white/5 hover:bg-[#F5C518] text-neutral-300 hover:text-black transition-colors"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-[#E50914] text-neutral-300 hover:text-white transition-colors cursor-pointer"
               aria-label={`Scroll ${title} left`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -65,7 +65,7 @@ export function ContentRow({
             <button
               type="button"
               onClick={() => handleScroll('right')}
-              className="p-1.5 rounded-lg bg-white/5 hover:bg-[#F5C518] text-neutral-300 hover:text-black transition-colors"
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-[#E50914] text-neutral-300 hover:text-white transition-colors cursor-pointer"
               aria-label={`Scroll ${title} right`}
             >
               <ChevronRight className="w-4 h-4" />

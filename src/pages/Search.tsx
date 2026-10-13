@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search as SearchIcon, SlidersHorizontal, Film, Tv } from 'lucide-react';
+import { Search as SearchIcon, SlidersHorizontal, Film, Tv, Globe, ArrowRight } from 'lucide-react';
 import { tmdbService } from '../services/tmdb';
 import { MediaItem } from '../types';
 import { getTMDBImageUrl, formatYear } from '../utils/slugify';
 import { Pagination } from '../components/Pagination';
 import { SEO } from '../components/SEO';
+import { getCountryBySlugOrCode, slugifyCountry, COUNTRY_REGISTRY } from '../utils/countryHelper';
 
 const DIRECTORS = ['All', 'Christopher Nolan', 'Quentin Tarantino', 'Martin Scorsese', 'Denis Villeneuve', 'Steven Spielberg', 'Russo Brothers'];
-const COUNTRIES = ['All', 'United States', 'United Kingdom', 'France', 'Japan', 'South Korea'];
+const COUNTRIES = [
+  'All',
+  'United States',
+  'United Kingdom',
+  'France',
+  'Japan',
+  'South Korea',
+  'Canada',
+  'Germany',
+  'Italy',
+  'Spain',
+  'Australia',
+  'India',
+];
 const AGE_RATINGS = ['All', 'G', 'PG', 'PG-13', 'R', 'NC-17'];
 const QUALITIES = ['All', '4K UHD', '1080p Full HD', '720p HD'];
 const NETWORKS = ['All', 'HBO', 'Netflix', 'Apple TV+', 'Amazon Prime', 'Disney+', 'Marvel Studios'];
@@ -56,6 +70,41 @@ export function Search() {
     let mounted = true;
     setLoading(true);
 
+    // If a country filter is selected, fetch titles filmed in that country
+    if (selectedCountry !== 'All') {
+      const countryInfo = getCountryBySlugOrCode(selectedCountry);
+      tmdbService
+        .getTitlesByCountry(countryInfo.code, currentPage, mediaType)
+        .then((data) => {
+          if (!mounted) return;
+          let filtered = data.results || [];
+          if (selectedGenre !== 'All') {
+            filtered = filtered.filter(
+              (item) =>
+                item.genres &&
+                item.genres.some(
+                  (g) => (typeof g === 'string' ? g : g.name).toLowerCase() === selectedGenre.toLowerCase()
+                )
+            );
+          }
+          if (selectedOrder === 'Rating: High to Low') {
+            filtered.sort((a, b) => (b.imdbRating || b.voteAverage || 0) - (a.imdbRating || a.voteAverage || 0));
+          } else if (selectedOrder === 'Release Date: New to Old') {
+            filtered.sort((a, b) => new Date(b.releaseDate || 0).getTime() - new Date(a.releaseDate || 0).getTime());
+          }
+          setResults(filtered);
+          setTotalPages(data.totalPages || 1);
+          setTotalItems(data.totalResults || filtered.length);
+          setLoading(false);
+        })
+        .catch(() => {
+          if (mounted) setLoading(false);
+        });
+      return () => {
+        mounted = false;
+      };
+    }
+
     const searchTerm = queryParam.trim() || (selectedGenre !== 'All' ? selectedGenre : 'Avengers');
 
     tmdbService
@@ -101,7 +150,7 @@ export function Search() {
     return () => {
       mounted = false;
     };
-  }, [queryParam, mediaType, selectedGenre, selectedOrder, currentPage]);
+  }, [queryParam, mediaType, selectedCountry, selectedGenre, selectedOrder, currentPage]);
 
   const displayTitle = queryParam
     ? `The search results for "${queryParam}"`
@@ -112,11 +161,11 @@ export function Search() {
   return (
     <div className="space-y-8 py-4">
       <SEO
-        title={`${queryParam ? `Search: ${queryParam}` : 'Advanced Search'} - T.Movie`}
-        description="Search thousands of movies, TV shows, and series with full TMDB accuracy on T.Movie."
+        title={`${queryParam ? `Search: ${queryParam}` : 'Advanced Search'} - Tstream`}
+        description="Search thousands of movies, TV shows, and series with full TMDB accuracy on Tstream."
       />
 
-      {/* Top Search Bar & Filter Panel (Image 7) */}
+      {/* Top Search Bar & Filter Panel */}
       <div className="rounded-3xl bg-[#16171E] border border-white/5 p-6 sm:p-8 space-y-6 shadow-2xl">
         {/* Search Input Bar */}
         <form onSubmit={handleSearchSubmit} className="relative w-full">
@@ -126,11 +175,11 @@ export function Search() {
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             placeholder="Type any movie, series or character (e.g. Avengers, Batman, Game of Thrones)..."
-            className="w-full pl-12 pr-28 py-3.5 rounded-2xl bg-[#0E0F12] border border-white/10 focus:border-[#F5C518] text-sm text-white placeholder-neutral-500 transition-all outline-hidden shadow-inner font-medium"
+            className="w-full pl-12 pr-28 py-3.5 rounded-2xl bg-[#0E0F12] border border-white/10 focus:border-[#E50914] text-sm text-white placeholder-neutral-500 transition-all outline-hidden shadow-inner font-medium"
           />
           <button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-black transition-colors cursor-pointer shadow-md shadow-[#F5C518]/20"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs font-black transition-colors cursor-pointer shadow-md shadow-red-900/40"
           >
             Search
           </button>
@@ -138,14 +187,14 @@ export function Search() {
 
         {/* Row 1: Type switch (All / Movie / Series) + Dropdowns */}
         <div className="flex flex-wrap items-center gap-4">
-          {/* Movie / Series Toggle Pill (Image 7) */}
+          {/* Movie / Series Toggle Pill */}
           <div className="flex items-center p-1 rounded-2xl bg-[#0E0F12] border border-white/5">
             <button
               type="button"
               onClick={() => setMediaType('all')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 mediaType === 'all'
-                  ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20'
+                  ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -156,7 +205,7 @@ export function Search() {
               onClick={() => setMediaType('movie')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 mediaType === 'movie'
-                  ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20'
+                  ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -167,7 +216,7 @@ export function Search() {
               onClick={() => setMediaType('tv')}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                 mediaType === 'tv'
-                  ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20'
+                  ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -175,7 +224,7 @@ export function Search() {
             </button>
           </div>
 
-          {/* Dropdown Filters Grid (Image 7) */}
+          {/* Dropdown Filters Grid */}
           <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {/* Genre */}
             <div className="space-y-1">
@@ -185,7 +234,7 @@ export function Search() {
               <select
                 value={selectedGenre}
                 onChange={(e) => setSelectedGenre(e.target.value)}
-                className="w-full py-2 px-3 rounded-xl bg-[#0E0F12] border border-white/10 text-xs text-[#F5C518] font-bold outline-hidden cursor-pointer"
+                className="w-full py-2 px-3 rounded-xl bg-[#0E0F12] border border-white/10 text-xs text-[#E50914] font-bold outline-hidden cursor-pointer"
               >
                 {GENRES.map((g) => (
                   <option key={g} value={g} className="bg-[#16171E] text-white">
@@ -298,10 +347,46 @@ export function Search() {
         </span>
       </div>
 
-      {/* Results Grid with horizontal card rows matching Image 7 */}
+      {/* Suggested Origin Country Banner */}
+      {queryParam.trim() && (() => {
+        const detected = getCountryBySlugOrCode(queryParam.trim());
+        const cleanQuery = queryParam.trim().toLowerCase();
+        const isCountry =
+          detected &&
+          (detected.name.toLowerCase() === cleanQuery ||
+            detected.shortName.toLowerCase() === cleanQuery ||
+            detected.slug === cleanQuery ||
+            cleanQuery.includes('united state') ||
+            cleanQuery.includes('united kingdom'));
+        if (!isCountry) return null;
+        return (
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-red-950/40 via-[#181B24] to-[#12141A] border border-red-500/30 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl select-none">{detected.flag}</span>
+              <div>
+                <h4 className="text-sm font-bold text-white">
+                  Looking for films and series filmed in {detected.name}?
+                </h4>
+                <p className="text-xs text-neutral-400">
+                  Browse our complete origin country catalog with full TMDB discovery.
+                </p>
+              </div>
+            </div>
+            <Link
+              to={`/country/${detected.slug}`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white font-extrabold text-xs transition-colors shadow shadow-red-900/40"
+            >
+              <span>Explore {detected.shortName} Productions</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        );
+      })()}
+
+      {/* Results Grid with horizontal card rows */}
       {loading ? (
         <div className="py-20 text-center">
-          <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">Loading Results...</span>
         </div>
       ) : results.length === 0 ? (
@@ -315,7 +400,7 @@ export function Search() {
               <Link
                 key={item.id}
                 to={item.type === 'movie' ? `/movie/${item.slug}` : `/tv/${item.slug}`}
-                className="flex items-center gap-4 p-3 rounded-2xl bg-[#16171E] border border-white/5 hover:border-[#F5C518]/40 transition-all duration-300 group shadow-lg"
+                className="flex items-center gap-4 p-3 rounded-2xl bg-[#16171E] border border-white/5 hover:border-[#E50914]/50 transition-all duration-300 group shadow-lg"
               >
                 <div className="w-20 sm:w-24 aspect-[2/3] rounded-xl overflow-hidden bg-black/40 shrink-0">
                   <img
@@ -331,7 +416,7 @@ export function Search() {
 
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-black/50 text-[#F5C518] border border-white/5">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-black/50 text-[#E50914] border border-white/5">
                       {item.type === 'tv' ? 'Series' : 'Movie'}
                     </span>
                     <p className="text-xs text-neutral-400">
@@ -339,7 +424,7 @@ export function Search() {
                     </p>
                   </div>
 
-                  <h3 className="text-sm font-bold text-white group-hover:text-[#F5C518] transition-colors truncate">
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#E50914] transition-colors truncate">
                     {item.title}
                   </h3>
 

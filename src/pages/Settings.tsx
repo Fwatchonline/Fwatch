@@ -80,7 +80,7 @@ export function Settings() {
         encodeURIComponent(JSON.stringify(watchlist, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `tmovie-watchlist-${new Date().toISOString().slice(0, 10)}.json`);
+      downloadAnchor.setAttribute('download', `tstream-watchlist-${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -110,8 +110,8 @@ export function Settings() {
   return (
     <div className="min-h-screen bg-[#08090c] pt-24 pb-16">
       <SEO
-        title="Settings & Preferences - T.Movie"
-        description="Configure your streaming preferences, default playback server, subtitle settings, and watchlist backups on T.Movie."
+        title="Settings & Preferences - Tstream"
+        description="Configure your streaming preferences, default playback server, subtitle settings, and watchlist backups on Tstream."
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'Settings', item: '/settings' },
@@ -120,8 +120,8 @@ export function Settings() {
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#1c202a] border border-[#F5C518]/40 text-white text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-2xl animate-bounce">
-          <CheckCircle className="w-4 h-4 text-[#F5C518] flex-shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-[#1c202a] border border-[#E50914]/40 text-white text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-2xl animate-bounce">
+          <CheckCircle className="w-4 h-4 text-[#E50914] flex-shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -129,7 +129,7 @@ export function Settings() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Header */}
         <div className="flex items-center gap-3 pb-6 border-b border-white/10">
-          <div className="p-2.5 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25 shadow-md shadow-[#F5C518]/10">
+          <div className="p-2.5 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/30 shadow-md shadow-red-950/20">
             <SettingsIcon className="w-6 h-6" />
           </div>
           <div>
@@ -145,7 +145,7 @@ export function Settings() {
         {/* Section 1: Playback Preferences */}
         <div className="bg-[#12141a] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
           <div className="flex items-center gap-2.5 pb-3 border-b border-white/5">
-            <Tv className="w-5 h-5 text-[#F5C518]" />
+            <Tv className="w-5 h-5 text-[#E50914]" />
             <h2 className="text-base font-bold text-white">Playback &amp; Streaming</h2>
           </div>
 
@@ -161,7 +161,7 @@ export function Settings() {
               <select
                 value={defaultServer}
                 onChange={(e) => handleServerChange(e.target.value)}
-                className="px-3.5 py-2 rounded-xl bg-[#171922] border border-white/10 text-xs sm:text-sm font-semibold text-white focus:border-[#F5C518] outline-none cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-[#171922] border border-white/10 text-xs sm:text-sm font-semibold text-white focus:border-[#E50914] outline-none cursor-pointer"
               >
                 <option value="server-vidcore">VidCore (Direct HLS - vidcore.io)</option>
                 <option value="server-vidrock">VidRock (Direct HLS - vidrock.net)</option>
@@ -190,7 +190,7 @@ export function Settings() {
                     onClick={() => handleQualityChange(q)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase cursor-pointer ${
                       preferredQuality === q
-                        ? 'bg-[#F5C518] text-black font-black shadow-md shadow-[#F5C518]/20'
+                        ? 'bg-[#E50914] text-white font-black shadow-md shadow-red-900/40'
                         : 'bg-[#171922] text-neutral-400 hover:text-white border border-white/5'
                     }`}
                   >
@@ -212,11 +212,11 @@ export function Settings() {
                 type="button"
                 onClick={handleAutoplayToggle}
                 className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                  autoplayNext ? 'bg-[#F5C518]' : 'bg-neutral-800 border border-white/10'
+                  autoplayNext ? 'bg-[#E50914]' : 'bg-neutral-800 border border-white/10'
                 }`}
               >
                 <span
-                  className={`w-5 h-5 rounded-full bg-black absolute top-0.5 transition-transform ${
+                  className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
                     autoplayNext ? 'right-0.5' : 'left-0.5 bg-neutral-400'
                   }`}
                 />
@@ -235,11 +235,11 @@ export function Settings() {
                 type="button"
                 onClick={handleSubtitlesToggle}
                 className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                  autoSubtitles ? 'bg-[#F5C518]' : 'bg-neutral-800 border border-white/10'
+                  autoSubtitles ? 'bg-[#E50914]' : 'bg-neutral-800 border border-white/10'
                 }`}
               >
                 <span
-                  className={`w-5 h-5 rounded-full bg-black absolute top-0.5 transition-transform ${
+                  className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
                     autoSubtitles ? 'right-0.5' : 'left-0.5 bg-neutral-400'
                   }`}
                 />
@@ -251,7 +251,7 @@ export function Settings() {
         {/* Section 2: Data & Watchlist Storage */}
         <div className="bg-[#12141a] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
           <div className="flex items-center gap-2.5 pb-3 border-b border-white/5">
-            <Database className="w-5 h-5 text-[#F5C518]" />
+            <Database className="w-5 h-5 text-[#E50914]" />
             <h2 className="text-base font-bold text-white">Data &amp; Storage Management</h2>
           </div>
 
@@ -312,14 +312,14 @@ export function Settings() {
         {/* Section 3: Platform Information */}
         <div className="bg-[#12141a] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
           <div className="flex items-center gap-2.5 pb-3 border-b border-white/5">
-            <Info className="w-5 h-5 text-[#F5C518]" />
-            <h2 className="text-base font-bold text-white">About T.Movie Platform</h2>
+            <Info className="w-5 h-5 text-[#E50914]" />
+            <h2 className="text-base font-bold text-white">About Tstream Platform</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
               <span className="text-neutral-400 block font-medium">Platform Version</span>
-              <span className="text-white font-bold text-sm">T.Movie v2.4.2</span>
+              <span className="text-white font-bold text-sm">Tstream v2.4.2</span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
@@ -332,7 +332,7 @@ export function Settings() {
 
             <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
               <span className="text-neutral-400 block font-medium">Edge CDN Servers</span>
-              <span className="text-[#F5C518] font-bold flex items-center gap-1">
+              <span className="text-[#E50914] font-bold flex items-center gap-1">
                 <Server className="w-3.5 h-3.5" />
                 5 High-Speed Active Nodes
               </span>

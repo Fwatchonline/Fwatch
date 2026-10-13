@@ -29,7 +29,7 @@ export function TopSidebarList({ movieItems, tvItems }: TopSidebarListProps) {
             type="button"
             onClick={() => setActiveTab('movie')}
             className={`px-2.5 py-1 rounded-md font-bold transition-all ${
-              activeTab === 'movie' ? 'bg-[#F5C518] text-black font-extrabold shadow' : 'text-neutral-400 hover:text-white'
+              activeTab === 'movie' ? 'bg-[#E50914] text-white font-extrabold shadow shadow-red-900/40' : 'text-neutral-400 hover:text-white'
             }`}
           >
             Movies
@@ -38,7 +38,7 @@ export function TopSidebarList({ movieItems, tvItems }: TopSidebarListProps) {
             type="button"
             onClick={() => setActiveTab('tv')}
             className={`px-2.5 py-1 rounded-md font-bold transition-all ${
-              activeTab === 'tv' ? 'bg-[#F5C518] text-black font-extrabold shadow' : 'text-neutral-400 hover:text-white'
+              activeTab === 'tv' ? 'bg-[#E50914] text-white font-extrabold shadow shadow-red-900/40' : 'text-neutral-400 hover:text-white'
             }`}
           >
             TV Series
@@ -62,11 +62,11 @@ export function TopSidebarList({ movieItems, tvItems }: TopSidebarListProps) {
               <span
                 className={`text-lg sm:text-xl font-black w-6 text-center bebas-font ${
                   index === 0
-                    ? 'text-[#F5C518]'
+                    ? 'text-[#E50914]'
                     : index === 1
-                    ? 'text-amber-400'
+                    ? 'text-red-400'
                     : index === 2
-                    ? 'text-yellow-500'
+                    ? 'text-red-500'
                     : 'text-neutral-500'
                 }`}
               >
@@ -74,7 +74,7 @@ export function TopSidebarList({ movieItems, tvItems }: TopSidebarListProps) {
               </span>
 
               {/* Poster Thumbnail */}
-              <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0 border border-white/10 group-hover:border-[#F5C518]/50">
+              <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0 border border-white/10 group-hover:border-[#E50914]/50">
                 <img
                   src={getTMDBImageUrl(item.posterPath, 'w300')}
                   alt={item.title}
@@ -88,7 +88,7 @@ export function TopSidebarList({ movieItems, tvItems }: TopSidebarListProps) {
 
               {/* Title & Metadata */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-white group-hover:text-[#F5C518] transition-colors truncate">
+                <h4 className="text-sm font-bold text-white group-hover:text-[#E50914] transition-colors truncate">
                   {item.title}
                 </h4>
 

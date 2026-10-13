@@ -93,7 +93,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
         <div className="max-w-2xl lg:max-w-3xl space-y-4 sm:space-y-5">
           {/* Metadata Badges */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
-            <span className="bg-[#ef174f] text-white text-[11px] font-black uppercase px-2.5 py-0.5 rounded shadow-lg shadow-[#ef174f]/30 flex items-center gap-1">
+            <span className="bg-[#E50914] text-white text-[11px] font-black uppercase px-2.5 py-0.5 rounded shadow-lg shadow-red-900/40 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               <span>FEATURED {current.type === 'movie' ? 'MOVIE' : 'SERIES'}</span>
             </span>
@@ -135,7 +135,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                 <Link
                   key={g.id}
                   to={`/genre/${g.slug}`}
-                  className="px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-[#ef174f]/30 hover:text-white border border-white/10 transition-colors"
+                  className="px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-[#E50914]/30 hover:text-white border border-white/10 transition-colors"
                 >
                   {g.name}
                 </Link>
@@ -152,8 +152,8 @@ export function HeroSlider({ items }: HeroSliderProps) {
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
             {/* Watch Now Button */}
             <Link
-              to={watchUrl}
-              className="px-6 py-3 rounded-xl bg-[#ef174f] hover:bg-[#d11242] text-white font-bold text-sm sm:text-base flex items-center gap-2 shadow-xl shadow-[#ef174f]/40 hover:scale-105 active:scale-95 transition-all glow-accent"
+              to={detailUrl}
+              className="px-6 py-3 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white font-bold text-sm sm:text-base flex items-center gap-2 shadow-xl shadow-red-900/40 hover:scale-105 active:scale-95 transition-all glow-accent"
             >
               <Play className="w-5 h-5 fill-white" />
               <span>Watch Now</span>
@@ -174,13 +174,13 @@ export function HeroSlider({ items }: HeroSliderProps) {
               onClick={() => toggleWatchlist(current)}
               className={`p-3 rounded-xl border transition-all ${
                 isSaved
-                  ? 'bg-[#ef174f]/20 border-[#ef174f] text-[#ef174f]'
+                  ? 'bg-[#E50914]/20 border-[#E50914] text-[#E50914]'
                   : 'bg-white/5 border-white/15 text-neutral-300 hover:text-white hover:bg-white/15'
               }`}
               title={isSaved ? 'In Watchlist' : 'Add to Watchlist'}
               aria-label="Toggle Watchlist"
             >
-              <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-[#ef174f]' : ''}`} />
+              <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-[#E50914]' : ''}`} />
             </button>
           </div>
         </div>
@@ -190,7 +190,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
       <button
         type="button"
         onClick={handlePrev}
-        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/40 hover:bg-[#ef174f] text-white backdrop-blur-md border border-white/10 transition-colors"
+        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/40 hover:bg-[#E50914] text-white backdrop-blur-md border border-white/10 transition-colors"
         aria-label="Previous Slide"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -199,7 +199,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
       <button
         type="button"
         onClick={handleNext}
-        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/40 hover:bg-[#ef174f] text-white backdrop-blur-md border border-white/10 transition-colors"
+        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/40 hover:bg-[#E50914] text-white backdrop-blur-md border border-white/10 transition-colors"
         aria-label="Next Slide"
       >
         <ChevronRight className="w-6 h-6" />
@@ -214,7 +214,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             onClick={() => setCurrentIndex(idx)}
             className={`transition-all duration-300 rounded-full ${
               idx === currentIndex
-                ? 'w-8 h-2 bg-[#ef174f]'
+                ? 'w-8 h-2 bg-[#E50914]'
                 : 'w-2 h-2 bg-white/30 hover:bg-white/60'
             }`}
             aria-label={`Go to slide ${idx + 1}`}

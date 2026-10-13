@@ -1,9 +1,12 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { CURATED_MOVIES, CURATED_TV_SHOWS, CURATED_EPISODES, CURATED_ACTORS, GENRES_LIST } from './src/services/curatedData';
 import { generateMediaSlug } from './src/utils/slugify';
+import { getCountryBySlugOrCode, COUNTRY_REGISTRY } from './src/utils/countryHelper';
+import { MediaItem } from './src/types';
 
 dotenv.config();
 
@@ -11,8 +14,63 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Persistent Views Store (persists to data/views.json)
+const VIEWS_FILE = path.join(__dirname, 'data', 'views.json');
+let viewsStore: Record<string, number> = {};
+
+try {
+  if (fs.existsSync(VIEWS_FILE)) {
+    const rawData = fs.readFileSync(VIEWS_FILE, 'utf-8');
+    viewsStore = JSON.parse(rawData);
+  }
+} catch (e) {
+  console.error('Failed to load views.json:', e);
+}
+
+function saveViewsStore() {
+  try {
+    fs.mkdirSync(path.dirname(VIEWS_FILE), { recursive: true });
+    fs.writeFileSync(VIEWS_FILE, JSON.stringify(viewsStore, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Failed to write views.json:', e);
+  }
+}
+
+// Organic baseline seeds for known titles
+const SEED_VIEWS: Record<string, number> = {
+  'tv:94997': 284, // House of the Dragon
+  'movie:634649': 147, // Spider-Man: No Way Home
+  'tv:1396': 892, // Breaking Bad
+  'tv:66732': 675, // Stranger Things
+  'tv:100088': 438, // The Last of Us
+  'movie:693134': 356, // Dune: Part Two
+  'movie:872585': 512, // Oppenheimer
+  'movie:533535': 480, // Deadpool & Wolverine
+};
+
+function getBaselineViews(key: string, id: string | number): number {
+  if (viewsStore[key] !== undefined) return viewsStore[key];
+  if (SEED_VIEWS[key]) return SEED_VIEWS[key];
+  const numId = Number(id);
+  if (!isNaN(numId) && numId > 0) {
+    return 100 + ((numId * 17) % 350);
+  }
+  const strId = String(id).toLowerCase();
+  const foundCurated = [...CURATED_MOVIES, ...CURATED_TV_SHOWS].find(
+    (c) => c.slug === strId || c.id === strId || String(c.tmdbId) === strId
+  );
+  if (foundCurated) {
+    const curKey = `${foundCurated.type}:${foundCurated.tmdbId}`;
+    if (viewsStore[curKey] !== undefined) return viewsStore[curKey];
+    if (SEED_VIEWS[curKey]) return SEED_VIEWS[curKey];
+    return 100 + ((foundCurated.tmdbId * 17) % 350);
+  }
+  return 180;
+}
 
 // TMDB credentials from environment
 const TMDB_API_KEY = process.env.TMDB_API_KEY || '4e44d9029b1270a757cddc766a1bcb63';
@@ -285,15 +343,51 @@ function formatMediaItem(raw: any, type: 'movie' | 'tv') {
     numberOfEpisodes: !isMovie ? raw.number_of_episodes : undefined,
     status: raw.status || 'Released',
     country: raw.production_countries?.[0]?.name || 'United States',
-    quality: '4K',
+    language: (raw.original_language || 'en').toUpperCase(),
+    budget: raw.budget,
+    revenue: raw.revenue,
+    homepage: raw.homepage,
+    director: raw.credits?.crew?.find((c: any) => c.job === 'Director')?.name || raw.created_by?.[0]?.name,
+    writer: raw.credits?.crew?.find((c: any) => c.job === 'Writer' || c.job === 'Screenplay' || c.job === 'Story')?.name || (raw.created_by?.[0]?.name ? raw.created_by.map((cb: any) => cb.name).join(', ') : undefined),
+    productionCompanies: raw.production_companies?.map((pc: any) => ({
+      id: pc.id,
+      name: pc.name,
+      logoPath: pc.logo_path,
+    })) || [],
+    collection: raw.belongs_to_collection ? {
+      id: raw.belongs_to_collection.id,
+      name: raw.belongs_to_collection.name,
+      posterPath: raw.belongs_to_collection.poster_path,
+      backdropPath: raw.belongs_to_collection.backdrop_path,
+      parts: undefined as any[] | undefined,
+    } : (undefined as { id: any; name: any; posterPath: any; backdropPath: any; parts?: any[] } | undefined),
+    keywords: (raw.keywords?.keywords || raw.keywords?.results || []).map((k: any) => k.name).slice(0, 15),
+    videosList: (raw.videos?.results || []).filter((v: any) => v.site === 'YouTube').slice(0, 8).map((v: any) => ({
+      id: v.id,
+      key: v.key,
+      name: v.name,
+      site: v.site,
+      size: v.size,
+      type: v.type,
+      official: !!v.official,
+      publishedAt: v.published_at || '',
+    })),
+    quality: '4K' as const,
     trailerKey: raw.videos?.results?.find((v: any) => v.type === 'Trailer' && v.site === 'YouTube')?.key,
-    cast: raw.credits?.cast?.slice(0, 10).map((c: any) => ({
+    cast: raw.credits?.cast?.slice(0, 15).map((c: any) => ({
       id: c.id,
       name: c.name,
       character: c.character,
       profilePath: c.profile_path,
       order: c.order,
     })),
+    network: !isMovie ? (raw.networks?.[0]?.name || raw.production_companies?.[0]?.name) : undefined,
+    networks: raw.networks?.map((n: any) => ({
+      id: n.id,
+      name: n.name,
+      logoPath: n.logo_path,
+    })),
+    views: viewsStore[key] !== undefined ? viewsStore[key] : getBaselineViews(key, tmdbId),
   };
 }
 
@@ -330,6 +424,24 @@ function formatPersonItem(raw: any) {
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
   return res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() });
+});
+
+// View Counter Endpoints (Real +1 counter per view, persisted to disk)
+app.post('/api/views/:type/:id', (req: Request, res: Response) => {
+  const { type, id } = req.params;
+  const key = `${type}:${id}`;
+  const current = viewsStore[key] !== undefined ? viewsStore[key] : getBaselineViews(key, id);
+  const updated = current + 1;
+  viewsStore[key] = updated;
+  saveViewsStore();
+  return res.json({ success: true, key, views: updated });
+});
+
+app.get('/api/views/:type/:id', (req: Request, res: Response) => {
+  const { type, id } = req.params;
+  const key = `${type}:${id}`;
+  const current = viewsStore[key] !== undefined ? viewsStore[key] : getBaselineViews(key, id);
+  return res.json({ key, views: current });
 });
 
 // Popular Actors from TMDB with pagination
@@ -580,10 +692,82 @@ app.get('/api/tmdb/tv/new_episodes', async (req: Request, res: Response) => {
   });
 });
 
+// Episodes Airing Today for Notifications
+app.get('/api/tmdb/tv/airing_today', async (_req: Request, res: Response) => {
+  const cacheKey = `airing_today_notifications_${new Date().toISOString().split('T')[0]}`;
+  const cached = serverCache.get(cacheKey);
+  if (cached && cached.expiry > Date.now()) {
+    return res.json(cached.data);
+  }
+
+  try {
+    const raw = await tmdbFetch('/tv/airing_today', { page: '1' });
+    if (raw && raw.results && raw.results.length > 0) {
+      const shows = raw.results.slice(0, 12);
+      const episodePromises = shows.map(async (s: any) => {
+        try {
+          const showDetails = await tmdbFetch(`/tv/${s.id}`, {});
+          const ep = showDetails?.last_episode_to_air || showDetails?.next_episode_to_air;
+          const showSlug = generateMediaSlug(s.id, s.name);
+          const seasonNum = ep?.season_number || 1;
+          const epNum = ep?.episode_number || 1;
+          const epTitle = ep?.name || `Episode ${epNum}`;
+          const stillPath = ep?.still_path || s.backdrop_path || s.poster_path;
+
+          return {
+            id: `today-ep-${s.id}-s${seasonNum}-e${epNum}`,
+            title: `Season ${seasonNum}, Episode ${epNum} released today`,
+            mediaTitle: s.name,
+            episodeName: epTitle,
+            type: 'episode' as const,
+            time: 'Today',
+            image: stillPath
+              ? `https://image.tmdb.org/t/p/w500${stillPath}`
+              : 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500',
+            read: false,
+            link: `/tv/${showSlug}/season/${seasonNum}/episode/${epNum}`,
+            seasonNumber: seasonNum,
+            episodeNumber: epNum,
+          };
+        } catch {
+          return null;
+        }
+      });
+
+      const episodes = (await Promise.all(episodePromises)).filter(Boolean);
+      if (episodes.length > 0) {
+        serverCache.set(cacheKey, { data: episodes, expiry: Date.now() + CACHE_TTL_MS });
+        return res.json(episodes);
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch airing today:', e);
+  }
+
+  // Fallback to curated episodes mapped as today
+  const fallback = CURATED_EPISODES.slice(0, 8).map((ep, idx) => ({
+    id: `today-curated-${ep.id}`,
+    title: `Season ${ep.seasonNumber}, Episode ${ep.episodeNumber} released today`,
+    mediaTitle: ep.showTitle,
+    episodeName: ep.name,
+    type: 'episode' as const,
+    time: idx < 3 ? 'Just now' : 'Today',
+    image: ep.stillPath
+      ? `https://image.tmdb.org/t/p/w500${ep.stillPath}`
+      : 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500',
+    read: false,
+    link: `/tv/${ep.showSlug}/season/${ep.seasonNumber}/episode/${ep.episodeNumber}`,
+    seasonNumber: ep.seasonNumber,
+    episodeNumber: ep.episodeNumber,
+  }));
+
+  return res.json(fallback);
+});
+
 // Movie Details
 app.get('/api/tmdb/movie/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
-  const raw = await tmdbFetch(`/movie/${id}`, { append_to_response: 'external_ids,credits,videos,similar' });
+  const raw = await tmdbFetch(`/movie/${id}`, { append_to_response: 'external_ids,credits,videos,similar,keywords' });
   if (raw) {
     const formatted = formatMediaItem(raw, 'movie');
     const imdbId = raw.external_ids?.imdb_id || raw.imdb_id;
@@ -595,6 +779,25 @@ app.get('/api/tmdb/movie/:id', async (req: Request, res: Response) => {
     if (imdbId) {
       formatted.imdbId = imdbId;
     }
+
+    // If part of collection, fetch collection parts
+    if (raw.belongs_to_collection?.id) {
+      try {
+        const colRaw = await tmdbFetch(`/collection/${raw.belongs_to_collection.id}`);
+        if (colRaw && colRaw.parts) {
+          formatted.collection = {
+            id: colRaw.id,
+            name: colRaw.name,
+            posterPath: colRaw.poster_path,
+            backdropPath: colRaw.backdrop_path,
+            parts: colRaw.parts.map((p: any) => formatMediaItem(p, 'movie')),
+          };
+        }
+      } catch (_e) {
+        // ignore
+      }
+    }
+
     return res.json(formatted);
   }
 
@@ -607,7 +810,7 @@ app.get('/api/tmdb/movie/:id', async (req: Request, res: Response) => {
 // TV Show Details
 app.get('/api/tmdb/tv/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
-  const raw = await tmdbFetch(`/tv/${id}`, { append_to_response: 'external_ids,credits,videos,similar' });
+  const raw = await tmdbFetch(`/tv/${id}`, { append_to_response: 'external_ids,credits,videos,similar,keywords' });
   if (raw) {
     const formatted = formatMediaItem(raw, 'tv');
     const imdbId = raw.external_ids?.imdb_id || raw.imdb_id;
@@ -703,12 +906,19 @@ app.get('/api/tmdb/tv/:id/season/:seasonNumber', async (req: Request, res: Respo
   });
 });
 
-// Discover by genre
+// Discover by genre or company
 app.get('/api/tmdb/discover/:type', async (req: Request, res: Response) => {
   const { type } = req.params;
   const genreId = req.query.with_genres as string;
+  const companyId = req.query.with_companies as string;
+  const sortBy = (req.query.sort_by as string) || 'popularity.desc';
   const page = req.query.page ? String(req.query.page) : '1';
-  const raw = await tmdbFetch(`/discover/${type}`, { with_genres: genreId || '', page });
+
+  const params: Record<string, string> = { page, sort_by: sortBy };
+  if (genreId) params.with_genres = genreId;
+  if (companyId) params.with_companies = companyId;
+
+  const raw = await tmdbFetch(`/discover/${type}`, params);
   if (raw && raw.results) {
     const results = raw.results.map((r: any) => formatMediaItem(r, type as 'movie' | 'tv'));
     await enrichWithImdbRatings(results, type as 'movie' | 'tv');
@@ -721,14 +931,231 @@ app.get('/api/tmdb/discover/:type', async (req: Request, res: Response) => {
   }
 
   const fallback = type === 'movie' ? CURATED_MOVIES : CURATED_TV_SHOWS;
-  const filtered = genreId
-    ? fallback.filter((item) => item.genres.some((g) => g.id === Number(genreId)))
-    : fallback;
+  let filtered = fallback;
+  if (genreId) {
+    filtered = filtered.filter((item) => item.genres.some((g) => g.id === Number(genreId)));
+  }
   return res.json({
     results: filtered,
     page: 1,
     total_pages: 1,
     total_results: filtered.length,
+  });
+});
+
+// Search Company by query
+app.get('/api/tmdb/search/company', async (req: Request, res: Response) => {
+  const query = req.query.query as string;
+  const page = req.query.page ? String(req.query.page) : '1';
+  if (!query) return res.json({ results: [], page: 1, total_pages: 1, total_results: 0 });
+
+  const raw = await tmdbFetch('/search/company', { query, page });
+  if (raw && raw.results) {
+    return res.json({
+      results: raw.results.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        logoPath: c.logo_path,
+        originCountry: c.origin_country,
+      })),
+      page: raw.page || Number(page),
+      total_pages: raw.total_pages || 1,
+      total_results: raw.total_results || raw.results.length,
+    });
+  }
+  return res.json({ results: [], page: 1, total_pages: 1, total_results: 0 });
+});
+
+// Company details by ID
+app.get('/api/tmdb/company/:id', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const raw = await tmdbFetch(`/company/${id}`);
+  if (raw && raw.id) {
+    return res.json({
+      id: raw.id,
+      name: raw.name,
+      description: raw.description,
+      headquarters: raw.headquarters,
+      homepage: raw.homepage,
+      logoPath: raw.logo_path,
+      originCountry: raw.origin_country,
+      parentCompany: raw.parent_company ? {
+        id: raw.parent_company.id,
+        name: raw.parent_company.name,
+        logoPath: raw.parent_company.logo_path,
+      } : null,
+    });
+  }
+  return res.status(404).json({ error: 'Company not found' });
+});
+
+// Company Titles (both Movies and Series produced by this studio)
+app.get('/api/tmdb/company/:id/titles', async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const page = req.query.page ? String(req.query.page) : '1';
+
+  const [companyRaw, moviesRaw, tvRaw, moviesP2, tvP2] = await Promise.all([
+    tmdbFetch(`/company/${id}`),
+    tmdbFetch('/discover/movie', { with_companies: id, sort_by: 'popularity.desc', page: '1' }),
+    tmdbFetch('/discover/tv', { with_companies: id, sort_by: 'popularity.desc', page: '1' }),
+    tmdbFetch('/discover/movie', { with_companies: id, sort_by: 'popularity.desc', page: '2' }),
+    tmdbFetch('/discover/tv', { with_companies: id, sort_by: 'popularity.desc', page: '2' }),
+  ]);
+
+  const rawMovies = [...(moviesRaw?.results || []), ...(moviesP2?.results || [])];
+  const rawTv = [...(tvRaw?.results || []), ...(tvP2?.results || [])];
+
+  const movies: MediaItem[] = rawMovies.map((r: any) => formatMediaItem(r, 'movie'));
+  const tv: MediaItem[] = rawTv.map((r: any) => formatMediaItem(r, 'tv'));
+
+  // Fallback to curated if discover returned no items
+  if (movies.length === 0 && tv.length === 0) {
+    const compName = (companyRaw?.name || '').toLowerCase();
+    const curM = CURATED_MOVIES.filter(
+      (m) => m.productionCompanies?.some((pc) => pc.id === Number(id) || (compName && pc.name.toLowerCase().includes(compName)))
+    );
+    const curT = CURATED_TV_SHOWS.filter(
+      (t) => t.productionCompanies?.some((pc) => pc.id === Number(id) || (compName && pc.name.toLowerCase().includes(compName)))
+    );
+    movies.push(...curM);
+    tv.push(...curT);
+  }
+
+  await Promise.all([
+    enrichWithImdbRatings(movies, 'movie'),
+    enrichWithImdbRatings(tv, 'tv'),
+  ]);
+
+  // Combine and sort by IMDb rating / popularity
+  const all = [...movies, ...tv].sort(
+    (a, b) => (b.imdbRating || b.voteAverage || 0) - (a.imdbRating || a.voteAverage || 0)
+  );
+
+  const company = companyRaw && companyRaw.id ? {
+    id: companyRaw.id,
+    name: companyRaw.name,
+    description: companyRaw.description,
+    headquarters: companyRaw.headquarters,
+    homepage: companyRaw.homepage,
+    logoPath: companyRaw.logo_path,
+    originCountry: companyRaw.origin_country,
+    parentCompany: companyRaw.parent_company,
+  } : {
+    id: Number(id),
+    name: `Studio #${id}`,
+    logoPath: null,
+  };
+
+  return res.json({
+    company,
+    movies,
+    tv,
+    all,
+    totalMovies: moviesRaw?.total_results || movies.length,
+    totalTv: tvRaw?.total_results || tv.length,
+    totalResults: (moviesRaw?.total_results || movies.length) + (tvRaw?.total_results || tv.length),
+    page: Number(page),
+  });
+});
+
+// Country Titles (Films and series filmed/produced in a specific country)
+app.get('/api/tmdb/country/:code/titles', async (req: Request, res: Response) => {
+  const codeParam = (req.params.code || '').trim();
+  const page = req.query.page ? String(req.query.page) : '1';
+  const type = (req.query.type as string) || 'all'; // 'movie' | 'tv' | 'all'
+  const sortBy = (req.query.sort_by as string) || 'popularity.desc';
+  const genreId = req.query.with_genres as string;
+
+  const country = getCountryBySlugOrCode(codeParam);
+
+  const fetchMovies = type === 'all' || type === 'movie';
+  const fetchTv = type === 'all' || type === 'tv';
+
+  const movieParams: Record<string, string> = {
+    with_origin_country: country.code,
+    sort_by: sortBy,
+    page,
+    'vote_count.gte': '15',
+  };
+  if (genreId) movieParams.with_genres = genreId;
+
+  const tvParams: Record<string, string> = {
+    with_origin_country: country.code,
+    sort_by: sortBy,
+    page,
+    'vote_count.gte': '8',
+  };
+  if (genreId) tvParams.with_genres = genreId;
+
+  const [moviesRaw, tvRaw] = await Promise.all([
+    fetchMovies ? tmdbFetch('/discover/movie', movieParams) : Promise.resolve(null),
+    fetchTv ? tmdbFetch('/discover/tv', tvParams) : Promise.resolve(null),
+  ]);
+
+  let movies: MediaItem[] = [];
+  let tv: MediaItem[] = [];
+
+  if (moviesRaw && moviesRaw.results) {
+    movies = moviesRaw.results.map((r: any) => formatMediaItem(r, 'movie'));
+    await enrichWithImdbRatings(movies, 'movie');
+  }
+
+  if (tvRaw && tvRaw.results) {
+    tv = tvRaw.results.map((r: any) => formatMediaItem(r, 'tv'));
+    await enrichWithImdbRatings(tv, 'tv');
+  }
+
+  // Interleave for "all"
+  const all: MediaItem[] = [];
+  const maxLen = Math.max(movies.length, tv.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (movies[i]) all.push(movies[i]);
+    if (tv[i]) all.push(tv[i]);
+  }
+
+  // Fallbacks from curated data if discover returned nothing
+  if (movies.length === 0 && fetchMovies) {
+    const curMovies = CURATED_MOVIES.filter(
+      (m) =>
+        m.country?.toLowerCase().includes(country.name.toLowerCase()) ||
+        m.country?.toLowerCase().includes(country.shortName.toLowerCase()) ||
+        country.code === 'US'
+    );
+    movies = curMovies.slice(0, 20);
+    all.push(...movies);
+  }
+
+  if (tv.length === 0 && fetchTv) {
+    const curTv = CURATED_TV_SHOWS.filter(
+      (t) =>
+        t.country?.toLowerCase().includes(country.name.toLowerCase()) ||
+        t.country?.toLowerCase().includes(country.shortName.toLowerCase()) ||
+        country.code === 'US'
+    );
+    tv = curTv.slice(0, 20);
+    all.push(...tv);
+  }
+
+  const primaryList = type === 'movie' ? movies : type === 'tv' ? tv : all;
+  const totalMovies = moviesRaw?.total_results || movies.length;
+  const totalTv = tvRaw?.total_results || tv.length;
+  const totalResults = type === 'movie' ? totalMovies : type === 'tv' ? totalTv : totalMovies + totalTv;
+  const totalPages = Math.min(
+    Math.max(moviesRaw?.total_pages || 1, tvRaw?.total_pages || 1, 1),
+    50
+  );
+
+  return res.json({
+    country,
+    results: primaryList,
+    movies,
+    tv,
+    all,
+    totalMovies,
+    totalTv,
+    totalResults,
+    totalPages,
+    page: Number(page),
   });
 });
 
@@ -914,6 +1341,120 @@ app.get('/api/stream/live', async (req: Request, res: Response) => {
     res.end();
   } catch (err: any) {
     res.status(500).json({ ok: false, error: String(err?.message || err) });
+  }
+});
+
+// -------------------------------------------------------------
+// FMOV Stream API Proxy Endpoints
+// -------------------------------------------------------------
+const FMOV_API_BASE = process.env.VITE_STREAM_API_BASE_URL || 'https://api.fmov.my';
+
+app.get('/api/fmov/health', async (_req: Request, res: Response) => {
+  try {
+    const upstreamRes = await fetch(`${FMOV_API_BASE}/api/health`, {
+      headers: { Accept: 'application/json' },
+    });
+    const data = await upstreamRes.json();
+    res.json(data);
+  } catch (err: any) {
+    res.status(502).json({ ok: false, error: String(err?.message || err) });
+  }
+});
+
+app.get('/api/fmov/providers', async (_req: Request, res: Response) => {
+  try {
+    const upstreamRes = await fetch(`${FMOV_API_BASE}/api/providers`, {
+      headers: { Accept: 'application/json' },
+    });
+    const data = await upstreamRes.json();
+    res.json(data);
+  } catch (err: any) {
+    res.status(502).json({ success: false, error: String(err?.message || err) });
+  }
+});
+
+app.get('/api/fmov/streams/movie/:tmdbId', async (req: Request, res: Response) => {
+  try {
+    const tmdbId = req.params.tmdbId;
+    const upstreamRes = await fetch(`${FMOV_API_BASE}/api/streams/movie/${tmdbId}`, {
+      headers: { Accept: 'application/json' },
+    });
+    const data = await upstreamRes.json();
+    res.json(data);
+  } catch (err: any) {
+    res.status(502).json({ success: false, error: String(err?.message || err) });
+  }
+});
+
+app.get('/api/fmov/streams/series/:tmdbId', async (req: Request, res: Response) => {
+  try {
+    const tmdbId = req.params.tmdbId;
+    const season = req.query.season || 1;
+    const episode = req.query.episode || 1;
+    const upstreamRes = await fetch(
+      `${FMOV_API_BASE}/api/streams/series/${tmdbId}?season=${season}&episode=${episode}`,
+      { headers: { Accept: 'application/json' } }
+    );
+    const data = await upstreamRes.json();
+    res.json(data);
+  } catch (err: any) {
+    res.status(502).json({ success: false, error: String(err?.message || err) });
+  }
+});
+
+// Secure stream proxy with explicit upstream allowlist
+app.get('/api/fmov/proxy', async (req: Request, res: Response) => {
+  try {
+    const targetUrl = req.query.url as string;
+    if (!targetUrl) {
+      res.status(400).send('Missing url parameter');
+      return;
+    }
+    const parsed = new URL(targetUrl);
+    const ALLOWED_HOST_SUFFIXES = [
+      'fmov.my',
+      'googleusercontent.com',
+      'hakunaymatata.com',
+      'klcoxn.com',
+      'bwcvxn.com',
+      'hsxcon.com',
+      'kwsvon.com',
+      'klnwm.com',
+      'hlowxn.com',
+      'hlscob.com',
+      'hlnom.com',
+      'flcwou.com',
+      '111477.xyz',
+      'pixeldrain.dev',
+      'pages.dev',
+      'net27.cc',
+    ];
+    const isAllowed = ALLOWED_HOST_SUFFIXES.some(
+      (suffix) => parsed.hostname === suffix || parsed.hostname.endsWith(`.${suffix}`)
+    );
+    if (!isAllowed) {
+      res.status(403).send('Host not in proxy allowlist');
+      return;
+    }
+
+    const headers: Record<string, string> = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    };
+    if (req.headers.range) {
+      headers['Range'] = req.headers.range;
+    }
+    const upstream = await fetch(targetUrl, { headers });
+    res.status(upstream.status);
+    upstream.headers.forEach((val, key) => {
+      if (!['transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        res.setHeader(key, val);
+      }
+    });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const arrayBuffer = await upstream.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
+  } catch (err: any) {
+    res.status(500).send(String(err?.message || err));
   }
 });
 

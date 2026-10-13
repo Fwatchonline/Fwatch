@@ -86,8 +86,8 @@ export function Artists() {
   return (
     <div className="space-y-8 py-4">
       <SEO
-        title="Popular People & Celebrities - T.Movie"
-        description="Explore popular movie and TV series actors, actresses, directors, writers, and producers with complete TMDB profiles on T.Movie."
+        title="Popular People & Celebrities - Tstream"
+        description="Explore popular movie and TV series actors, actresses, directors, writers, and producers with complete TMDB profiles on Tstream."
       />
 
       {/* Page Title */}
@@ -108,7 +108,7 @@ export function Artists() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search the Actors, Actresses, Directors..."
-          className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#16171E] border border-white/5 focus:border-[#F5C518] focus:bg-[#1c1d26] text-sm text-white placeholder-neutral-500 transition-all outline-hidden shadow-inner"
+          className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#16171E] border border-white/5 focus:border-[#E50914] focus:bg-[#1c1d26] text-sm text-white placeholder-neutral-500 transition-all outline-hidden shadow-inner"
         />
         {search && (
           <button
@@ -132,7 +132,7 @@ export function Artists() {
               onClick={() => setFilterRole(tab)}
               className={`px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/25 scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/40 scale-105'
                   : 'bg-[#16171E] text-neutral-400 hover:text-white hover:bg-white/5 border border-white/5'
               }`}
             >
@@ -145,7 +145,7 @@ export function Artists() {
       {/* Loading state */}
       {loading ? (
         <div className="py-24 text-center">
-          <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
             Loading Artists from TMDB...
           </span>
@@ -171,7 +171,7 @@ export function Artists() {
               <Link
                 key={artist.id}
                 to={`/actor/${artist.slug}`}
-                className="group relative rounded-2xl overflow-hidden bg-[#16171E] border border-white/5 hover:border-[#F5C518]/40 transition-all duration-300 shadow-lg flex flex-col"
+                className="group relative rounded-2xl overflow-hidden bg-[#16171E] border border-white/5 hover:border-[#E50914]/50 transition-all duration-300 shadow-lg flex flex-col"
               >
                 {/* Aspect Portrait Container */}
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/40">
@@ -192,7 +192,7 @@ export function Artists() {
                       {roleBadge}
                     </span>
                     {artist.knownForDepartment && artist.knownForDepartment !== roleBadge && (
-                      <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-bold text-[#F5C518]">
+                      <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-bold text-[#E50914]">
                         {artist.knownForDepartment}
                       </span>
                     )}
@@ -201,7 +201,7 @@ export function Artists() {
 
                 {/* Bottom Info */}
                 <div className="p-3 text-center bg-[#16171E] border-t border-white/5">
-                  <h3 className="text-sm font-bold text-white group-hover:text-[#F5C518] transition-colors truncate">
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#E50914] transition-colors truncate">
                     {artist.name}
                   </h3>
                   <p className="text-[11px] text-neutral-400 mt-0.5">

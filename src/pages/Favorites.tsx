@@ -28,8 +28,8 @@ export function Favorites() {
   return (
     <div className="min-h-screen bg-[#08090c] pt-24 pb-16">
       <SEO
-        title="My Saved Watchlist - T.Movie"
-        description="Your personal watchlist on T.Movie. Keep track of all movies and TV shows you plan to watch."
+        title="My Saved Watchlist - Tstream"
+        description="Your personal watchlist on Tstream. Keep track of all movies and TV shows you plan to watch."
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'Watchlist', item: '/watchlist' },
@@ -39,8 +39,8 @@ export function Favorites() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25 shadow-md shadow-[#F5C518]/10">
-              <Bookmark className="w-6 h-6 fill-[#F5C518]/30" />
+            <div className="p-2.5 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/30 shadow-md shadow-red-950/30">
+              <Bookmark className="w-6 h-6 fill-[#E50914]/30" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-wide">
@@ -60,7 +60,7 @@ export function Favorites() {
                   onClick={() => setFilter('all')}
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     filter === 'all'
-                      ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20 font-extrabold'
+                      ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40 font-extrabold'
                       : 'text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -71,7 +71,7 @@ export function Favorites() {
                   onClick={() => setFilter('movie')}
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     filter === 'movie'
-                      ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20 font-extrabold'
+                      ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40 font-extrabold'
                       : 'text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -82,7 +82,7 @@ export function Favorites() {
                   onClick={() => setFilter('tv')}
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     filter === 'tv'
-                      ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20 font-extrabold'
+                      ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40 font-extrabold'
                       : 'text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -104,8 +104,8 @@ export function Favorites() {
 
         {watchlist.length === 0 ? (
           <div className="py-24 text-center space-y-4 max-w-sm mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-[#F5C518]/10 border border-[#F5C518]/20 flex items-center justify-center text-[#F5C518] mx-auto shadow-lg shadow-[#F5C518]/10">
-              <Bookmark className="w-8 h-8 fill-[#F5C518]/20" />
+            <div className="w-16 h-16 rounded-2xl bg-red-950/60 border border-red-500/30 flex items-center justify-center text-[#E50914] mx-auto shadow-lg shadow-red-950/30">
+              <Bookmark className="w-8 h-8 fill-[#E50914]/20" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white mb-1">Your Watchlist is Empty</h3>
@@ -115,9 +115,9 @@ export function Favorites() {
             </div>
             <Link
               to="/movies"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-extrabold rounded-xl shadow-lg shadow-[#F5C518]/25 transition-all hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#E50914] hover:bg-[#B81D24] text-white text-xs font-extrabold rounded-xl shadow-lg shadow-red-900/40 transition-all hover:scale-105 active:scale-95"
             >
-              <Play className="w-4 h-4 fill-black" />
+              <Play className="w-4 h-4 fill-white" />
               <span>Browse Movies Now</span>
             </Link>
           </div>
@@ -130,14 +130,10 @@ export function Favorites() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
               {paginatedItems.map((item) => {
                 const detailUrl = item.type === 'movie' ? `/movie/${item.slug}` : `/tv/${item.slug}`;
-                const watchUrl =
-                  item.type === 'movie'
-                    ? `/watch/movie/${item.slug}`
-                    : `/watch/tv/${item.slug}/season/1/episode/1`;
 
                 return (
                   <div key={item.id} className="group relative flex flex-col">
-                    <div className="relative aspect-[2/3] w-full rounded-2xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#F5C518]/60 group-hover:shadow-2xl group-hover:shadow-[#F5C518]/15 transition-all duration-300">
+                    <div className="relative aspect-[2/3] w-full rounded-2xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#E50914]/60 group-hover:shadow-2xl group-hover:shadow-red-900/20 transition-all duration-300">
                       <img
                         src={getTMDBImageUrl(item.posterPath, 'w500')}
                         alt={item.title}
@@ -160,15 +156,15 @@ export function Favorites() {
                         </button>
 
                         <Link
-                          to={watchUrl}
-                          className="w-11 h-11 rounded-full bg-[#F5C518] hover:bg-[#E5B508] text-black flex items-center justify-center shadow-lg shadow-[#F5C518]/30 mx-auto transition-transform hover:scale-110 active:scale-95"
-                          title="Watch Now"
+                          to={detailUrl}
+                          className="w-11 h-11 rounded-full bg-[#E50914] hover:bg-[#B81D24] text-white flex items-center justify-center shadow-lg shadow-red-900/40 mx-auto transition-transform hover:scale-110 active:scale-95"
+                          title="View Details"
                         >
-                          <Play className="w-5 h-5 fill-black ml-0.5" />
+                          <Play className="w-5 h-5 fill-white ml-0.5" />
                         </Link>
 
                         <div className="flex items-center justify-center gap-1.5 text-xs">
-                          <span className="text-[10px] font-black px-1.5 py-0.2 rounded bg-[#F5C518] text-black">IMDb</span>
+                          <span className="text-[10px] font-black px-1.5 py-0.2 rounded bg-[#E50914] text-white">IMDb</span>
                           <span className="text-neutral-100 font-bold">{formatRating(item.imdbRating || item.voteAverage)}</span>
                         </div>
                       </div>
@@ -177,7 +173,7 @@ export function Favorites() {
                     <div className="mt-2 space-y-0.5">
                       <Link
                         to={detailUrl}
-                        className="text-sm font-semibold text-white group-hover:text-[#F5C518] transition-colors truncate block"
+                        className="text-sm font-semibold text-white group-hover:text-[#E50914] transition-colors truncate block"
                       >
                         {item.title}
                       </Link>

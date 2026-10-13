@@ -80,12 +80,12 @@ export function Pagination({
             <strong className="text-white">
               {Math.min(currentPage * itemsPerPage, totalItems)}
             </strong>{' '}
-            of <strong className="text-[#F5C518]">{totalItems}</strong> titles
+            of <strong className="text-[#E50914]">{totalItems}</strong> titles
           </span>
         ) : (
           <span>
             Page <strong className="text-white">{currentPage}</strong> of{' '}
-            <strong className="text-[#F5C518]">{totalPages}</strong>
+            <strong className="text-[#E50914]">{totalPages}</strong>
           </span>
         )}
       </div>
@@ -101,7 +101,7 @@ export function Pagination({
           className={`p-2 rounded-xl border border-white/5 flex items-center justify-center transition-all ${
             currentPage <= 1
               ? 'opacity-30 cursor-not-allowed bg-white/5 text-neutral-500'
-              : 'bg-[#16171E] hover:bg-[#F5C518] text-white hover:text-black cursor-pointer shadow-sm active:scale-95'
+              : 'bg-[#16171E] hover:bg-[#E50914] text-white hover:text-white cursor-pointer shadow-sm active:scale-95'
           }`}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -130,7 +130,7 @@ export function Pagination({
               onClick={() => handlePageSelect(pageNum)}
               className={`w-9 h-9 rounded-xl text-xs font-extrabold transition-all cursor-pointer select-none ${
                 isCurrent
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/25 scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/40 scale-105'
                   : 'bg-[#16171E] hover:bg-white/10 text-neutral-300 hover:text-white border border-white/5'
               }`}
             >
@@ -148,7 +148,7 @@ export function Pagination({
           className={`p-2 rounded-xl border border-white/5 flex items-center justify-center transition-all ${
             currentPage >= totalPages
               ? 'opacity-30 cursor-not-allowed bg-white/5 text-neutral-500'
-              : 'bg-[#16171E] hover:bg-[#F5C518] text-white hover:text-black cursor-pointer shadow-sm active:scale-95'
+              : 'bg-[#16171E] hover:bg-[#E50914] text-white hover:text-white cursor-pointer shadow-sm active:scale-95'
           }`}
         >
           <ChevronRight className="w-4 h-4" />

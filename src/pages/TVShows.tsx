@@ -65,14 +65,14 @@ export function TVShows() {
   return (
     <div className="space-y-8 py-4">
       <SEO
-        title="TV Series - Watch Returning Seasons & Shows - T.Movie"
-        description="Stream popular TV series, mini-series, and seasonal premieres with real TMDB metadata on T.Movie."
+        title="TV Series - Watch Returning Seasons & Shows - Tstream"
+        description="Stream popular TV series, mini-series, and seasonal premieres with real TMDB metadata on Tstream."
       />
 
       {/* Header Banner */}
       <div className="rounded-3xl bg-[#16171E] border border-white/5 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xl">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#F5C518] text-black flex items-center justify-center font-black shadow-lg shadow-[#F5C518]/20 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#E50914] text-white flex items-center justify-center font-black shadow-lg shadow-red-900/40 shrink-0">
             <Tv className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
@@ -102,7 +102,7 @@ export function TVShows() {
                   }}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#F5C518] text-black shadow-md shadow-[#F5C518]/20'
+                      ? 'bg-[#E50914] text-white shadow-md shadow-red-900/40'
                       : 'text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -119,7 +119,7 @@ export function TVShows() {
             onChange={(e) =>
               setSelectedGenre(e.target.value === 'all' ? 'all' : Number(e.target.value))
             }
-            className="bg-[#0E0F12] border border-white/10 rounded-2xl px-4 py-2 text-xs font-bold text-[#F5C518] outline-hidden cursor-pointer focus:border-[#F5C518]"
+            className="bg-[#0E0F12] border border-white/10 rounded-2xl px-4 py-2 text-xs font-bold text-[#E50914] outline-hidden cursor-pointer focus:border-[#E50914]"
           >
             <option value="all" className="bg-[#16171E] text-white">All Genres</option>
             {genres.map((g) => (
@@ -134,7 +134,7 @@ export function TVShows() {
       {/* Series Grid */}
       {loading ? (
         <div className="py-24 text-center">
-          <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
             Loading TV Series...
           </span>

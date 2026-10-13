@@ -19,7 +19,7 @@ import {
 import { SEO } from '../components/SEO';
 
 const COLOR_PRESETS = [
-  { name: 'T.Movie Gold', hex: '#F5C518' },
+  { name: 'Tstream Red', hex: '#E50914' },
   { name: 'Cyan Teal', hex: '#14B8A6' },
   { name: 'Neon Purple', hex: '#8B5CF6' },
   { name: 'Crimson Red', hex: '#EF4444' },
@@ -56,7 +56,7 @@ export function EmbedApiDocs() {
   const [copied, setCopied] = useState<string | null>(null);
 
   // Generate Embed Path and Full URL
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://tmovie.snapmire.workers.dev';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://tstream.online';
   const cleanColor = selectedColor.replace('#', '');
 
   const queryParams = new URLSearchParams();
@@ -118,19 +118,19 @@ export function EmbedApiDocs() {
   return (
     <div className="py-6 space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <SEO
-        title="Embed Video Player & Developer API - T.Movie"
-        description="Integrate T.Movie's ultra-fast 4K streaming player directly into your website. Zero ads, customizable colors, and full postMessage controls."
+        title="Embed Video Player & Developer API - Tstream"
+        description="Integrate Tstream's ultra-fast 4K streaming player directly into your website. Zero ads, customizable colors, and full postMessage controls."
       />
 
       {/* Hero Header */}
       <div className="text-center max-w-3xl mx-auto space-y-4 pt-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F5C518]/10 border border-[#F5C518]/30 text-xs font-black text-[#F5C518]">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-950/60 border border-red-500/30 text-xs font-black text-[#E50914]">
           <Sparkles className="w-3.5 h-3.5" />
           <span>FREE &amp; ZERO-CONFIG DEVELOPER API</span>
         </div>
 
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-          Embed T.Movie Player on <span className="text-[#F5C518]">Your Website</span>
+          Embed Tstream Player on <span className="text-[#E50914]">Your Website</span>
         </h1>
 
         <p className="text-base sm:text-lg text-neutral-300 leading-relaxed">
@@ -141,7 +141,7 @@ export function EmbedApiDocs() {
         {/* Feature Badges */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs text-neutral-300">
-            <Zap className="w-3.5 h-3.5 text-[#F5C518]" />
+            <Zap className="w-3.5 h-3.5 text-[#E50914]" />
             <span>Direct HLS (No Ads / Popups)</span>
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs text-neutral-300">
@@ -162,7 +162,7 @@ export function EmbedApiDocs() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-              <Code2 className="w-6 h-6 text-[#F5C518]" />
+              <Code2 className="w-6 h-6 text-[#E50914]" />
               <span>Interactive Player Generator</span>
             </h2>
             <p className="text-xs sm:text-sm text-neutral-400 mt-1">
@@ -180,7 +180,7 @@ export function EmbedApiDocs() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
                 mediaType === 'movie'
-                  ? 'bg-[#F5C518] text-black shadow-md'
+                  ? 'bg-[#E50914] text-white shadow-md shadow-red-900/30'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -195,7 +195,7 @@ export function EmbedApiDocs() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
                 mediaType === 'tv'
-                  ? 'bg-[#F5C518] text-black shadow-md'
+                  ? 'bg-[#E50914] text-white shadow-md shadow-red-900/30'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -217,7 +217,7 @@ export function EmbedApiDocs() {
               type="text"
               value={tmdbId}
               onChange={(e) => setTmdbId(e.target.value)}
-              className="w-full bg-[#0D0F14] text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#F5C518]"
+              className="w-full bg-[#0D0F14] text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#E50914]"
               placeholder="e.g. 550"
             />
             {/* Quick Samples */}
@@ -254,7 +254,7 @@ export function EmbedApiDocs() {
                   min="1"
                   value={season}
                   onChange={(e) => setSeason(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  className="w-full bg-[#0D0F14] text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#F5C518]"
+                  className="w-full bg-[#0D0F14] text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#E50914]"
                 />
               </div>
 
@@ -267,7 +267,7 @@ export function EmbedApiDocs() {
                   min="1"
                   value={episode}
                   onChange={(e) => setEpisode(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  className="w-full bg-[#0D0F14] text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#F5C518]"
+                  className="w-full bg-[#0D0F14] text-white border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:border-[#E50914]"
                 />
               </div>
             </>
@@ -313,7 +313,7 @@ export function EmbedApiDocs() {
               type="checkbox"
               checked={autoplay}
               onChange={(e) => setAutoplay(e.target.checked)}
-              className="w-4 h-4 rounded text-[#F5C518] focus:ring-0"
+              className="w-4 h-4 rounded text-[#E50914] focus:ring-0 accent-[#E50914]"
             />
             <span>Autoplay Video (`autoplay`)</span>
           </label>
@@ -325,7 +325,7 @@ export function EmbedApiDocs() {
                   type="checkbox"
                   checked={nextEpisode}
                   onChange={(e) => setNextEpisode(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#F5C518] focus:ring-0"
+                  className="w-4 h-4 rounded text-[#E50914] focus:ring-0 accent-[#E50914]"
                 />
                 <span>Next Episode Button (`nextEpisode`)</span>
               </label>
@@ -335,7 +335,7 @@ export function EmbedApiDocs() {
                   type="checkbox"
                   checked={episodeSelector}
                   onChange={(e) => setEpisodeSelector(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#F5C518] focus:ring-0"
+                  className="w-4 h-4 rounded text-[#E50914] focus:ring-0 accent-[#E50914]"
                 />
                 <span>Episode Switcher (`episodeSelector`)</span>
               </label>
@@ -345,7 +345,7 @@ export function EmbedApiDocs() {
                   type="checkbox"
                   checked={autoplayNextEpisode}
                   onChange={(e) => setAutoplayNextEpisode(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#F5C518] focus:ring-0"
+                  className="w-4 h-4 rounded text-[#E50914] focus:ring-0 accent-[#E50914]"
                 />
                 <span>Autoplay Next Episode (`autoplayNextEpisode`)</span>
               </label>
@@ -357,7 +357,7 @@ export function EmbedApiDocs() {
               type="checkbox"
               checked={overlay}
               onChange={(e) => setOverlay(e.target.checked)}
-              className="w-4 h-4 rounded text-[#F5C518] focus:ring-0"
+              className="w-4 h-4 rounded text-[#E50914] focus:ring-0 accent-[#E50914]"
             />
             <span>Show Overlay (`overlay`)</span>
           </label>
@@ -367,14 +367,14 @@ export function EmbedApiDocs() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-neutral-400 flex items-center gap-2">
-              <Play className="w-3.5 h-3.5 text-[#F5C518]" />
+              <Play className="w-3.5 h-3.5 text-[#E50914]" />
               <span>Live Embed Preview</span>
             </span>
             <a
               href={fullEmbedUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-bold text-[#F5C518] hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-[#E50914] hover:underline flex items-center gap-1"
             >
               <span>Open in New Tab</span>
               <ExternalLink className="w-3 h-3" />
@@ -404,7 +404,7 @@ export function EmbedApiDocs() {
                   type="button"
                   onClick={() => setActiveCodeTab('html')}
                   className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                    activeCodeTab === 'html' ? 'bg-[#F5C518] text-black' : 'text-neutral-400 hover:text-white'
+                    activeCodeTab === 'html' ? 'bg-[#E50914] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   HTML Iframe
@@ -413,7 +413,7 @@ export function EmbedApiDocs() {
                   type="button"
                   onClick={() => setActiveCodeTab('responsive')}
                   className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                    activeCodeTab === 'responsive' ? 'bg-[#F5C518] text-black' : 'text-neutral-400 hover:text-white'
+                    activeCodeTab === 'responsive' ? 'bg-[#E50914] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Responsive (16:9)
@@ -422,7 +422,7 @@ export function EmbedApiDocs() {
                   type="button"
                   onClick={() => setActiveCodeTab('react')}
                   className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                    activeCodeTab === 'react' ? 'bg-[#F5C518] text-black' : 'text-neutral-400 hover:text-white'
+                    activeCodeTab === 'react' ? 'bg-[#E50914] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   React / Next.js
@@ -431,7 +431,7 @@ export function EmbedApiDocs() {
                   type="button"
                   onClick={() => setActiveCodeTab('url')}
                   className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                    activeCodeTab === 'url' ? 'bg-[#F5C518] text-black' : 'text-neutral-400 hover:text-white'
+                    activeCodeTab === 'url' ? 'bg-[#E50914] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Direct URL
@@ -483,7 +483,7 @@ export function EmbedApiDocs() {
       {/* ------------------------------------------------------------- */}
       <div className="rounded-3xl bg-[#111318] border border-white/[0.08] p-6 sm:p-8 shadow-2xl space-y-6">
         <div className="flex items-center gap-2.5">
-          <Sliders className="w-5 h-5 text-[#F5C518]" />
+          <Sliders className="w-5 h-5 text-[#E50914]" />
           <h2 className="text-xl sm:text-2xl font-black text-white">
             Embed URL Parameters Reference
           </h2>
@@ -502,16 +502,16 @@ export function EmbedApiDocs() {
             </thead>
             <tbody className="divide-y divide-white/5 text-neutral-300 font-medium">
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">color</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">color</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">string</td>
-                <td className="py-3 px-3 font-mono text-neutral-400">F5C518</td>
+                <td className="py-3 px-3 font-mono text-neutral-400">E50914</td>
                 <td className="py-3 px-3">
                   Hex color code for player scrubber, buttons and badges (without # or URL encoded).
                 </td>
                 <td className="py-3 px-3 font-mono text-neutral-400">color=14b8a6</td>
               </tr>
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">autoplay</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">autoplay</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">boolean</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">false</td>
                 <td className="py-3 px-3">
@@ -520,7 +520,7 @@ export function EmbedApiDocs() {
                 <td className="py-3 px-3 font-mono text-neutral-400">autoplay=true</td>
               </tr>
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">nextEpisode</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">nextEpisode</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">boolean</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">true</td>
                 <td className="py-3 px-3">
@@ -529,7 +529,7 @@ export function EmbedApiDocs() {
                 <td className="py-3 px-3 font-mono text-neutral-400">nextEpisode=true</td>
               </tr>
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">episodeSelector</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">episodeSelector</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">boolean</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">true</td>
                 <td className="py-3 px-3">
@@ -538,7 +538,7 @@ export function EmbedApiDocs() {
                 <td className="py-3 px-3 font-mono text-neutral-400">episodeSelector=true</td>
               </tr>
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">autoplayNextEpisode</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">autoplayNextEpisode</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">boolean</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">true</td>
                 <td className="py-3 px-3">
@@ -547,7 +547,7 @@ export function EmbedApiDocs() {
                 <td className="py-3 px-3 font-mono text-neutral-400">autoplayNextEpisode=true</td>
               </tr>
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">overlay</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">overlay</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">boolean</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">false</td>
                 <td className="py-3 px-3">
@@ -556,7 +556,7 @@ export function EmbedApiDocs() {
                 <td className="py-3 px-3 font-mono text-neutral-400">overlay=false</td>
               </tr>
               <tr>
-                <td className="py-3 px-3 font-mono font-bold text-[#F5C518]">server</td>
+                <td className="py-3 px-3 font-mono font-bold text-[#E50914]">server</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">string</td>
                 <td className="py-3 px-3 font-mono text-neutral-400">auto</td>
                 <td className="py-3 px-3">
@@ -574,7 +574,7 @@ export function EmbedApiDocs() {
       {/* ------------------------------------------------------------- */}
       <div className="rounded-3xl bg-[#111318] border border-white/[0.08] p-6 sm:p-8 shadow-2xl space-y-6">
         <div className="flex items-center gap-2.5">
-          <Terminal className="w-5 h-5 text-[#F5C518]" />
+          <Terminal className="w-5 h-5 text-[#E50914]" />
           <h2 className="text-xl sm:text-2xl font-black text-white">
             postMessage JavaScript API
           </h2>
@@ -655,7 +655,7 @@ iframe.contentWindow.postMessage(
       {/* ------------------------------------------------------------- */}
       <div className="rounded-3xl bg-[#111318] border border-white/[0.08] p-6 sm:p-8 shadow-2xl space-y-6">
         <div className="flex items-center gap-2.5">
-          <Layers className="w-5 h-5 text-[#F5C518]" />
+          <Layers className="w-5 h-5 text-[#E50914]" />
           <h2 className="text-xl sm:text-2xl font-black text-white">
             Direct Streaming JSON API
           </h2>
@@ -676,7 +676,7 @@ iframe.contentWindow.postMessage(
             <p className="text-xs text-neutral-400">
               Returns direct playable HLS master m3u8 streams, multi-language subtitles, and audio tracks.
             </p>
-            <p className="font-mono text-[11px] text-[#F5C518]">
+            <p className="font-mono text-[11px] text-[#E50914]">
               {origin}/api/stream/resolve?id=550&amp;type=movie
             </p>
           </div>
@@ -691,7 +691,7 @@ iframe.contentWindow.postMessage(
             <p className="text-xs text-neutral-400">
               Returns comprehensive WebVTT multi-language subtitles with full language names.
             </p>
-            <p className="font-mono text-[11px] text-[#F5C518]">
+            <p className="font-mono text-[11px] text-[#E50914]">
               {origin}/api/vyla/subtitles?id=1399&amp;type=tv&amp;season=1&amp;episode=1
             </p>
           </div>

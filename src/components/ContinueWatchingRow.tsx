@@ -12,7 +12,7 @@ export function ContinueWatchingRow() {
     <section className="my-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-[#F5C518]/15 border border-[#F5C518]/30 text-[#F5C518]">
+          <div className="p-1.5 rounded-lg bg-red-950/60 border border-red-500/30 text-[#E50914]">
             <Clock className="w-5 h-5" />
           </div>
           <div>
@@ -26,7 +26,7 @@ export function ContinueWatchingRow() {
         <button
           type="button"
           onClick={clearAllProgress}
-          className="text-xs text-neutral-400 hover:text-white transition-colors"
+          className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
         >
           Clear History
         </button>
@@ -34,17 +34,10 @@ export function ContinueWatchingRow() {
 
       <div className="flex items-start space-x-4 overflow-x-auto no-scrollbar scroll-smooth py-2">
         {progressList.map((item) => {
-          const watchUrl =
-            item.type === 'movie'
-              ? `/watch/movie/${item.slug}`
-              : `/watch/tv/${item.slug}/season/${item.seasonNumber || 1}/episode/${
-                  item.episodeNumber || 1
-                }`;
-
           return (
             <div
               key={item.id}
-              className="group relative flex-shrink-0 w-64 sm:w-72 rounded-xl overflow-hidden bg-[#151820] border border-white/10 hover:border-[#F5C518]/50 transition-all flex flex-col"
+              className="group relative flex-shrink-0 w-64 sm:w-72 rounded-xl overflow-hidden bg-[#151820] border border-white/10 hover:border-[#E50914]/50 transition-all flex flex-col"
             >
               {/* Thumbnail Container */}
               <div className="relative aspect-video w-full bg-neutral-900 overflow-hidden">
@@ -55,12 +48,12 @@ export function ContinueWatchingRow() {
                 />
 
                 <Link
-                  to={watchUrl}
+                  to={item.type === 'movie' ? `/movie/${item.slug}` : `/tv/${item.slug}`}
                   className="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition-colors"
-                  aria-label={`Resume watching ${item.title}`}
+                  aria-label={`View details for ${item.title}`}
                 >
-                  <div className="w-11 h-11 rounded-full bg-[#F5C518] text-black flex items-center justify-center shadow-lg shadow-[#F5C518]/40 group-hover:scale-110 transition-transform">
-                    <Play className="w-5 h-5 fill-black ml-0.5" />
+                  <div className="w-11 h-11 rounded-full bg-[#E50914] text-white flex items-center justify-center shadow-lg shadow-red-900/40 group-hover:scale-110 transition-transform">
+                    <Play className="w-5 h-5 fill-white ml-0.5" />
                   </div>
                 </Link>
 
@@ -72,7 +65,7 @@ export function ContinueWatchingRow() {
                     e.stopPropagation();
                     removeProgress(item.id);
                   }}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-black/70 hover:bg-black text-neutral-300 hover:text-white transition-colors"
+                  className="absolute top-2 right-2 p-1 rounded-full bg-black/70 hover:bg-black text-neutral-300 hover:text-white transition-colors cursor-pointer"
                   title="Remove from history"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -89,7 +82,7 @@ export function ContinueWatchingRow() {
                 {/* Progress bar overlay */}
                 <div className="absolute bottom-0 inset-x-0 h-1.5 bg-neutral-700">
                   <div
-                    className="h-full bg-[#F5C518]"
+                    className="h-full bg-[#E50914]"
                     style={{ width: `${item.percentage}%` }}
                   />
                 </div>
@@ -102,8 +95,8 @@ export function ContinueWatchingRow() {
                   <span>{Math.round(item.percentage)}% watched</span>
                 </div>
                 <Link
-                  to={watchUrl}
-                  className="text-sm font-bold text-white group-hover:text-[#F5C518] transition-colors truncate block"
+                  to={item.type === 'movie' ? `/movie/${item.slug}` : `/tv/${item.slug}`}
+                  className="text-sm font-bold text-white group-hover:text-[#E50914] transition-colors truncate block"
                 >
                   {item.title}
                 </Link>

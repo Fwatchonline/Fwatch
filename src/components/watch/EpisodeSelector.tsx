@@ -57,7 +57,7 @@ export function EpisodeSelector({
             disabled={!hasPrevEpisode}
             className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               hasPrevEpisode
-                ? 'bg-[#161922] hover:bg-[#F5C518] text-[#A1A7B5] hover:text-black border border-white/10'
+                ? 'bg-[#161922] hover:bg-[#E50914] text-[#A1A7B5] hover:text-white border border-white/10'
                 : 'bg-white/5 text-neutral-600 border border-transparent cursor-not-allowed'
             }`}
             title="Previous Episode"
@@ -71,7 +71,7 @@ export function EpisodeSelector({
             <select
               value={currentSeasonNumber}
               onChange={(e) => onSelectSeason(Number(e.target.value))}
-              className="bg-[#161922] text-white border border-white/10 hover:border-white/20 rounded-xl px-3 py-2 text-xs font-bold appearance-none pr-8 cursor-pointer focus:outline-none focus:border-[#F5C518]"
+              className="bg-[#161922] text-white border border-white/10 hover:border-white/20 rounded-xl px-3 py-2 text-xs font-bold appearance-none pr-8 cursor-pointer focus:outline-none focus:border-[#E50914]"
             >
               {Array.from({ length: Math.max(totalSeasons, currentSeasonNumber, 1) }, (_, i) => i + 1).map((sNum) => (
                 <option key={sNum} value={sNum} className="bg-[#111318] text-white">
@@ -85,7 +85,7 @@ export function EpisodeSelector({
           </div>
 
           {/* Current Episode Indicator */}
-          <span className="text-xs font-black text-[#F5C518] px-3 py-1.5 rounded-lg bg-[#F5C518]/10 border border-[#F5C518]/25">
+          <span className="text-xs font-black text-[#E50914] px-3 py-1.5 rounded-lg bg-red-950/60 border border-red-500/30">
             S{String(currentSeasonNumber).padStart(2, '0')} · E{String(currentEpisodeNumber).padStart(2, '0')}
           </span>
         </div>
@@ -96,10 +96,10 @@ export function EpisodeSelector({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="px-3 py-2 rounded-xl bg-[#161922] border border-white/10 hover:border-[#F5C518]/50 text-white hover:text-[#F5C518] transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-[#161922] border border-white/10 hover:border-[#E50914]/50 text-white hover:text-[#E50914] transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             title="View all episodes"
           >
-            <List className="w-4 h-4 text-[#F5C518]" />
+            <List className="w-4 h-4 text-[#E50914]" />
             <span>Episode List ({episodes.length || '10+'})</span>
           </button>
 
@@ -125,7 +125,7 @@ export function EpisodeSelector({
             disabled={!hasNextEpisode}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md ${
               hasNextEpisode
-                ? 'bg-[#F5C518] hover:bg-[#FFD633] text-black shadow-[#F5C518]/20 cursor-pointer'
+                ? 'bg-[#E50914] hover:bg-[#B81D24] text-white shadow-red-900/30 cursor-pointer'
                 : 'bg-white/5 text-neutral-600 border border-transparent cursor-not-allowed'
             }`}
             title="Next Episode"
@@ -179,7 +179,7 @@ export function EpisodeSelector({
                       }}
                       className={`w-full flex items-center gap-3.5 p-3 rounded-2xl text-left transition-all border cursor-pointer ${
                         isCurrent
-                          ? 'bg-[#F5C518]/10 border-[#F5C518] shadow-lg shadow-[#F5C518]/10'
+                          ? 'bg-red-950/40 border-[#E50914] shadow-lg shadow-red-900/20'
                           : 'bg-[#0D0F14] border-white/5 hover:border-white/20 hover:bg-[#161922]'
                       }`}
                     >
@@ -199,8 +199,8 @@ export function EpisodeSelector({
                         )}
                         {isCurrent && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <span className="w-6 h-6 rounded-full bg-[#F5C518] flex items-center justify-center text-black">
-                              <Play className="w-3.5 h-3.5 fill-black ml-0.5" />
+                            <span className="w-6 h-6 rounded-full bg-[#E50914] flex items-center justify-center text-white">
+                              <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
                             </span>
                           </div>
                         )}
@@ -209,7 +209,7 @@ export function EpisodeSelector({
                       {/* Episode Meta */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-black ${isCurrent ? 'text-[#F5C518]' : 'text-white'}`}>
+                          <span className={`text-xs font-black ${isCurrent ? 'text-[#E50914]' : 'text-white'}`}>
                             EP {ep.episodeNumber}
                           </span>
                           {ep.runtime && (
@@ -219,7 +219,7 @@ export function EpisodeSelector({
                             </span>
                           )}
                           {isCurrent && (
-                            <span className="ml-auto text-[10px] font-black uppercase text-black bg-[#F5C518] px-2 py-0.5 rounded-full">
+                            <span className="ml-auto text-[10px] font-black uppercase text-white bg-[#E50914] px-2 py-0.5 rounded-full">
                               Now Playing
                             </span>
                           )}

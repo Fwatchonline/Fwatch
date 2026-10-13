@@ -53,15 +53,15 @@ export function Sidebar() {
       {/* Top Brand & Toggle */}
       <div>
         <div className="h-18 px-5 flex items-center justify-between border-b border-[#22242c]/50 relative">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#E5B508] to-[#F5C518] flex items-center justify-center shadow-lg shadow-[#F5C518]/20 group-hover:scale-105 transition-transform flex-shrink-0">
-              <span className="font-extrabold text-black text-xl tracking-tighter flex items-center">
-                T<Play className="w-3.5 h-3.5 fill-black ml-0.5" />
+          <Link to="/" className="flex items-center gap-2.5 group" aria-label="Tstream Home">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#B81D24] to-[#E50914] flex items-center justify-center shadow-lg shadow-red-900/40 group-hover:scale-105 transition-transform flex-shrink-0">
+              <span className="font-extrabold text-white text-xl tracking-tighter flex items-center">
+                T<Play className="w-3.5 h-3.5 fill-white ml-0.5" />
               </span>
             </div>
             {!sidebarCollapsed && (
-              <span className="text-xl font-bold tracking-tight text-white flex items-center">
-                T<span className="text-[#F5C518]">.Movie</span>
+              <span className="text-xl font-black tracking-tight text-white flex items-center">
+                T<span className="text-[#E50914]">stream</span>
               </span>
             )}
           </Link>
@@ -71,7 +71,7 @@ export function Sidebar() {
             type="button"
             onClick={toggleSidebar}
             title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            className="w-7 h-7 rounded-full bg-[#1b1c24] hover:bg-[#F5C518] text-neutral-400 hover:text-black border border-white/10 flex items-center justify-center transition-colors absolute -right-3.5 top-6 z-50 shadow-md"
+            className="w-7 h-7 rounded-full bg-[#1b1c24] hover:bg-[#E50914] text-neutral-400 hover:text-white border border-white/10 flex items-center justify-center transition-colors absolute -right-3.5 top-6 z-50 shadow-md cursor-pointer"
           >
             {sidebarCollapsed ? (
               <ChevronRight className="w-4 h-4" />
@@ -101,23 +101,23 @@ export function Sidebar() {
                   title={sidebarCollapsed ? item.label : undefined}
                   className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group relative ${
                     active
-                      ? 'bg-[#1e2029] text-[#F5C518] font-semibold'
+                      ? 'bg-[#E50914]/15 text-[#E50914] font-bold shadow-sm'
                       : 'text-neutral-400 hover:text-white hover:bg-white/5'
                   } ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
                 >
                   {active && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#F5C518] rounded-r-full" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#E50914] rounded-r-full shadow-sm shadow-red-500/50" />
                   )}
                   <Icon
                     className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${
-                      active ? 'text-[#F5C518]' : 'text-neutral-400 group-hover:text-white'
+                      active ? 'text-[#E50914]' : 'text-neutral-400 group-hover:text-white'
                     }`}
                   />
                   {!sidebarCollapsed && (
                     <span className="flex-1 truncate">{item.label}</span>
                   )}
                   {!sidebarCollapsed && item.badge !== undefined && item.badge > 0 && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#F5C518]/20 text-[#F5C518]">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#E50914]/20 text-[#E50914]">
                       {item.badge}
                     </span>
                   )}
@@ -144,13 +144,13 @@ export function Sidebar() {
                   title={sidebarCollapsed ? item.label : undefined}
                   className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                     active
-                      ? 'bg-[#1e2029] text-[#F5C518] font-semibold'
+                      ? 'bg-[#E50914]/15 text-[#E50914] font-bold shadow-sm'
                       : 'text-neutral-400 hover:text-white hover:bg-white/5'
                   } ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
                 >
                   <Icon
                     className={`w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 ${
-                      active ? 'text-[#F5C518]' : 'text-neutral-400 group-hover:text-white'
+                      active ? 'text-[#E50914]' : 'text-neutral-400 group-hover:text-white'
                     }`}
                   />
                   {!sidebarCollapsed && (
@@ -173,9 +173,9 @@ export function Sidebar() {
             <button
               type="button"
               onClick={() => setPlansModalOpen(true)}
-              className="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-[#F5C518]/10 border border-[#F5C518] text-[#F5C518] text-xs font-bold transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-[#F5C518]/20"
+              className="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-[#E50914] border border-[#E50914] text-[#E50914] hover:text-white text-xs font-bold transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-red-900/30 cursor-pointer"
             >
-              <Crown className="w-4 h-4 text-[#F5C518] group-hover:scale-110 transition-transform" />
+              <Crown className="w-4 h-4 text-[#E50914] group-hover:text-white group-hover:scale-110 transition-transform" />
               <span>see plans</span>
             </button>
           </div>
@@ -184,7 +184,7 @@ export function Sidebar() {
             type="button"
             onClick={() => setPlansModalOpen(true)}
             title="See Plans"
-            className="w-12 h-12 mx-auto rounded-xl border border-[#F5C518] bg-[#F5C518]/10 text-[#F5C518] flex items-center justify-center hover:bg-[#F5C518] hover:text-black transition-colors"
+            className="w-12 h-12 mx-auto rounded-xl border border-[#E50914] bg-[#E50914]/10 text-[#E50914] flex items-center justify-center hover:bg-[#E50914] hover:text-white transition-colors cursor-pointer"
           >
             <Crown className="w-5 h-5" />
           </button>

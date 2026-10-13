@@ -1,5 +1,11 @@
 import { StreamingProvider, StreamResult, SubtitleTrack, AudioTrack, StreamQuality } from '../types';
 import { formatSubtitleFullLabel, resolveLanguageInfo } from '../utils/languages';
+import {
+  getFmovMovieStreams,
+  getFmovSeriesStreams,
+  convertFmovStreamToStreamResult,
+  FmovStreamItem,
+} from './fmovStream';
 
 const COMMON_QUALITIES: StreamQuality[] = [
   { label: 'Auto (Adaptive)', value: 'auto' },
@@ -78,10 +84,58 @@ async function fetchDirectStream(
  */
 export const STREAMING_SERVERS: StreamingProvider[] = [
   {
+    id: 'server-fmov',
+    name: 'FMOV Engine (Multi-Provider Aggregator)',
+    region: 'Global Edge Streams',
+    priority: 1,
+    type: 'both',
+    isAvailable: true,
+    latencyMs: 9,
+    async getStream({ tmdbId, type, season, episode }) {
+      const resp =
+        type === 'movie'
+          ? await getFmovMovieStreams(tmdbId)
+          : await getFmovSeriesStreams(tmdbId, season || 1, episode || 1);
+
+      if (resp.success && resp.streams && resp.streams.length > 0) {
+        const bestStream =
+          resp.streams.find(
+            (s) =>
+              s.format === 'hls' &&
+              (s.quality?.includes('4K') || s.quality?.includes('2160') || s.quality?.includes('1080'))
+          ) ||
+          resp.streams.find((s) => s.format === 'hls') ||
+          resp.streams.find((s) => s.format === 'mp4') ||
+          resp.streams[0];
+
+        const baseResult = convertFmovStreamToStreamResult(bestStream, tmdbId, type);
+
+        baseResult.sources = resp.streams.map((s) => ({
+          url: s.url,
+          format: s.format,
+          quality: s.quality || 'Auto',
+          serverName: s.name || `${s.provider} (${s.quality || 'HD'})`,
+        }));
+
+        return baseResult;
+      }
+
+      const fallback = await fetchDirectStream(tmdbId, type, season, episode, 'rivestream', false);
+      return {
+        serverId: 'server-fmov',
+        serverName: 'FMOV Engine (Multi-Provider Aggregator)',
+        sources: [{ url: fallback.hlsUrl, format: 'hls', quality: '1080p' }],
+        qualities: COMMON_QUALITIES,
+        subtitles: fallback.subtitles,
+        audioTracks: fallback.audioTracks,
+      };
+    },
+  },
+  {
     id: 'server-rive',
     name: 'RiveStream (Direct HLS - 4K/1080p)',
     region: 'Ultra Fast Edge CDN',
-    priority: 1,
+    priority: 2,
     type: 'both',
     isAvailable: true,
     latencyMs: 11,

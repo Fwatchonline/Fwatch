@@ -38,7 +38,7 @@ export function EmbedPlayer({ type }: EmbedPlayerProps) {
     ? rawColor.startsWith('#')
       ? rawColor
       : `#${rawColor}`
-    : '#F5C518';
+    : '#E50914';
 
   const autoPlayParam = searchParams.get('autoplay') || searchParams.get('autoPlay');
   const autoPlay = autoPlayParam === 'true' || autoPlayParam === '1';
@@ -67,6 +67,7 @@ export function EmbedPlayer({ type }: EmbedPlayerProps) {
   const [season, setSeason] = useState<TMDBSeason | null>(null);
   const [streamResult, setStreamResult] = useState<StreamResult | null>(null);
   const [currentServer, setCurrentServer] = useState<StreamingProvider>(STREAMING_SERVERS[0]);
+  const [failedServerIds, setFailedServerIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,7 +116,7 @@ export function EmbedPlayer({ type }: EmbedPlayerProps) {
       .then(async (resolved) => {
         if (!mounted) return;
         if (!resolved) {
-          setError('Title not found on T.Movie catalog');
+          setError('Title not found on Tstream catalog');
           setLoading(false);
           return;
         }
@@ -263,6 +264,7 @@ export function EmbedPlayer({ type }: EmbedPlayerProps) {
       setStreamResult(stream);
       setError(null);
     } catch {
+      setFailedServerIds((prev) => [...prev, server.id]);
       setError(`Server ${server.name} connection failed. Please choose another.`);
     } finally {
       setLoading(false);
@@ -327,7 +329,7 @@ export function EmbedPlayer({ type }: EmbedPlayerProps) {
   return (
     <div className="fixed inset-0 w-full h-full bg-black overflow-hidden select-none">
       <SEO
-        title={`Embed: ${mediaItem.title}${type === 'tv' ? ` S${currentSeason}E${currentEpisode}` : ''} - T.Movie`}
+        title={`Embed: ${mediaItem.title}${type === 'tv' ? ` S${currentSeason}E${currentEpisode}` : ''} - Tstream`}
         description="Embedded high speed video stream."
       />
 
@@ -359,6 +361,10 @@ export function EmbedPlayer({ type }: EmbedPlayerProps) {
               percent: duration > 0 ? (currentTime / duration) * 100 : 0,
             })
           }
+          servers={STREAMING_SERVERS}
+          currentServerId={currentServer.id}
+          onSelectServer={handleSelectServer}
+          failedServerIds={failedServerIds}
         />
       )}
 

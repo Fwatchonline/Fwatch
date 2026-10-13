@@ -47,7 +47,7 @@ export function GenresFilterRow() {
         <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Genres</h2>
         <Link
           to="/genres"
-          className="text-xs sm:text-sm font-bold text-[#F5C518] hover:text-[#E5B508] transition-colors flex items-center gap-1 group"
+          className="text-xs sm:text-sm font-bold text-[#E50914] hover:text-[#B81D24] transition-colors flex items-center gap-1 group"
         >
           <span>View All</span>
           <span className="transform group-hover:translate-x-0.5 transition-transform">→</span>
@@ -65,7 +65,7 @@ export function GenresFilterRow() {
               onClick={() => setSelectedGenreId(cat.id)}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/20 scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/30 scale-105'
                   : 'bg-[#181920] text-neutral-400 hover:text-white hover:bg-white/5 border border-white/5'
               }`}
             >

@@ -24,10 +24,10 @@ export function PlansModal() {
         </button>
 
         <div className="text-center mb-8">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-[#F5C518]/10 border border-[#F5C518]/30 flex items-center justify-center mb-3">
-            <Crown className="w-6 h-6 text-[#F5C518]" />
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-red-950/60 border border-red-500/30 flex items-center justify-center mb-3">
+            <Crown className="w-6 h-6 text-[#E50914]" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Choose Your T.Movie Plan</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Choose Your Tstream Plan</h2>
           <p className="text-sm text-neutral-400 mt-1 max-w-md mx-auto">
             Unlock 4K Ultra HD direct HLS streaming, multi-device support, and ad-free experience.
           </p>
@@ -44,15 +44,15 @@ export function PlansModal() {
               </div>
               <ul className="space-y-2.5 text-xs text-neutral-300">
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span>Full HD 1080p Direct Streams</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span>Watch on 2 Devices at once</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span>Subtitles in 30+ Languages</span>
                 </li>
               </ul>
@@ -60,38 +60,38 @@ export function PlansModal() {
             <button
               type="button"
               onClick={() => setPlansModalOpen(false)}
-              className="mt-6 w-full py-2.5 rounded-xl border border-white/20 hover:border-white/40 text-white text-xs font-bold transition-colors"
+              className="mt-6 w-full py-2.5 rounded-xl border border-white/20 hover:border-white/40 text-white text-xs font-bold transition-colors cursor-pointer"
             >
               Get Standard
             </button>
           </div>
 
           {/* Premium VIP */}
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-[#20212c] to-[#171822] border-2 border-[#F5C518] shadow-xl shadow-[#F5C518]/10 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-[#F5C518] text-black text-[10px] font-extrabold tracking-wider uppercase">
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-[#20212c] to-[#171822] border-2 border-[#E50914] shadow-xl shadow-red-950/40 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-[#E50914] text-white text-[10px] font-extrabold tracking-wider uppercase">
               Popular
             </div>
             <div>
-              <span className="text-xs font-bold text-[#F5C518] uppercase tracking-wider">VIP Premium</span>
+              <span className="text-xs font-bold text-[#E50914] uppercase tracking-wider">VIP Premium</span>
               <div className="mt-2 mb-4 flex items-baseline gap-1">
                 <span className="text-3xl font-extrabold text-white">$9.99</span>
                 <span className="text-xs text-neutral-400">/ month</span>
               </div>
               <ul className="space-y-2.5 text-xs text-neutral-300">
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span className="font-semibold text-white">4K Ultra HD + HDR10 Audio</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span>Watch on 5 Devices Simultaneously</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span>Fastest Direct HLS Edge CDN Servers</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-[#F5C518]" />
+                  <Check className="w-4 h-4 text-[#E50914]" />
                   <span>Early Access to New Releases</span>
                 </li>
               </ul>
@@ -99,7 +99,7 @@ export function PlansModal() {
             <button
               type="button"
               onClick={() => setPlansModalOpen(false)}
-              className="mt-6 w-full py-2.5 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-extrabold transition-colors shadow-lg shadow-[#F5C518]/25"
+              className="mt-6 w-full py-2.5 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs font-extrabold transition-colors shadow-lg shadow-red-900/40 cursor-pointer"
             >
               Get VIP Access
             </button>

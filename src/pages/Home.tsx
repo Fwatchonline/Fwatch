@@ -89,7 +89,7 @@ export function Home() {
   return (
     <div className="space-y-4">
       <SEO
-        title="T.Movie - Discover & Stream Movies, Series & Artists"
+        title="Tstream - Discover & Stream Movies, Series & Artists"
         description="Stream movies and TV series with real TMDB metadata, direct HLS video streaming, rich artist profiles, and high cinematic experience."
       />
 

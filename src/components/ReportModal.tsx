@@ -46,7 +46,7 @@ export function ReportModal({ isOpen, onClose, title, serverId }: ReportModalPro
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25">
+              <div className="p-2 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/40">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
@@ -60,7 +60,7 @@ export function ReportModal({ isOpen, onClose, title, serverId }: ReportModalPro
               <select
                 value={issueType}
                 onChange={(e) => setIssueType(e.target.value)}
-                className="w-full bg-[#151820] border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-[#F5C518]"
+                className="w-full bg-[#151820] border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-[#E50914]"
               >
                 <option value="buffering">Frequent Buffering / Stutter</option>
                 <option value="black_screen">Black Screen / Video Not Loading</option>
@@ -78,7 +78,7 @@ export function ReportModal({ isOpen, onClose, title, serverId }: ReportModalPro
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="E.g. Video stopped playing at 12:45..."
-                className="w-full bg-[#151820] border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#F5C518]"
+                className="w-full bg-[#151820] border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#E50914]"
               />
             </div>
 
@@ -92,7 +92,7 @@ export function ReportModal({ isOpen, onClose, title, serverId }: ReportModalPro
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-extrabold rounded-lg shadow-md shadow-[#F5C518]/25 cursor-pointer"
+                className="px-4 py-2 bg-[#E50914] hover:bg-[#B81D24] text-white text-xs font-extrabold rounded-lg shadow-md shadow-red-900/30 cursor-pointer"
               >
                 Submit Report
               </button>

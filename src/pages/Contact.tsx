@@ -42,8 +42,8 @@ export function Contact() {
   return (
     <div className="min-h-screen bg-[#08090c] pt-24 pb-16">
       <SEO
-        title="Contact Us - T.Movie Support"
-        description="Get in touch with the T.Movie streaming team for support, feature inquiries, bug reports, and content requests."
+        title="Contact Us - Tstream Support"
+        description="Get in touch with the Tstream streaming team for support, feature inquiries, bug reports, and content requests."
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'Contact Us', item: '/contact' },
@@ -54,7 +54,7 @@ export function Contact() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25 shadow-md shadow-[#F5C518]/10">
+            <div className="p-2.5 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/30 shadow-md shadow-red-950/30">
               <Headphones className="w-6 h-6" />
             </div>
             <div>
@@ -108,7 +108,7 @@ export function Contact() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="John Doe"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#F5C518] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all shadow-inner"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#E50914] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all shadow-inner"
                   />
                 </div>
 
@@ -120,7 +120,7 @@ export function Contact() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="john@example.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#F5C518] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all shadow-inner"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#E50914] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all shadow-inner"
                   />
                 </div>
               </div>
@@ -131,7 +131,7 @@ export function Contact() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#F5C518] text-sm text-white outline-none cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#E50914] text-sm text-white outline-none cursor-pointer"
                   >
                     <option value="technical">Playback / Streaming Issue</option>
                     <option value="content">Content Request (Movie/Series)</option>
@@ -148,7 +148,7 @@ export function Contact() {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="E.g. Inception 4K stream buffering"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#F5C518] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all shadow-inner"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#E50914] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all shadow-inner"
                   />
                 </div>
               </div>
@@ -161,22 +161,22 @@ export function Contact() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Provide as much context as possible (device, browser, title name, error message)..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#F5C518] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all resize-y shadow-inner"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#171922] border border-white/10 focus:border-[#E50914] focus:bg-[#1c1f2b] text-sm text-white placeholder-neutral-500 outline-none transition-all resize-y shadow-inner"
                 />
               </div>
 
               <div className="pt-2 flex items-center justify-between">
                 <p className="text-[11px] text-neutral-500 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#F5C518]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#E50914]" />
                   <span>Your email is strictly protected and never shared.</span>
                 </p>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] disabled:opacity-50 text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+                  className="px-6 py-2.5 rounded-xl bg-[#E50914] hover:bg-[#B81D24] disabled:opacity-50 text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
                 >
-                  <Send className="w-4 h-4 fill-black" />
+                  <Send className="w-4 h-4 fill-white" />
                   <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
                 </button>
               </div>
@@ -191,16 +191,16 @@ export function Contact() {
               
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="w-9 h-9 rounded-xl bg-[#F5C518]/15 text-[#F5C518] flex items-center justify-center flex-shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-red-950/60 text-[#E50914] flex items-center justify-center flex-shrink-0">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="text-[11px] text-neutral-400 block font-medium">Customer Support Email</span>
                     <a
-                      href="mailto:support@tmovie.stream"
-                      className="text-xs sm:text-sm font-bold text-white hover:text-[#F5C518] transition-colors"
+                      href="mailto:support@tstream.online"
+                      className="text-xs sm:text-sm font-bold text-white hover:text-[#E50914] transition-colors"
                     >
-                      support@tmovie.stream
+                      support@tstream.online
                     </a>
                   </div>
                 </div>
@@ -215,9 +215,9 @@ export function Contact() {
                       href="https://discord.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs sm:text-sm font-bold text-white hover:text-[#F5C518] transition-colors"
+                      className="text-xs sm:text-sm font-bold text-white hover:text-[#E50914] transition-colors"
                     >
-                      discord.gg/tmovie-community
+                      discord.gg/tstream-community
                     </a>
                   </div>
                 </div>
@@ -240,7 +240,7 @@ export function Contact() {
             <div className="p-6 rounded-3xl bg-[#12141a] border border-white/5 space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Server className="w-4 h-4 text-[#F5C518]" />
+                  <Server className="w-4 h-4 text-[#E50914]" />
                   <span>Playback Network Status</span>
                 </h3>
                 <span className="text-[11px] text-emerald-400 font-bold">100% Operational</span>
@@ -251,7 +251,7 @@ export function Contact() {
               <div className="pt-1">
                 <Link
                   to="/help"
-                  className="text-xs text-[#F5C518] hover:underline font-bold flex items-center gap-1"
+                  className="text-xs text-[#E50914] hover:underline font-bold flex items-center gap-1"
                 >
                   <HelpCircle className="w-3.5 h-3.5" />
                   <span>Check FAQ in Help Center &rarr;</span>

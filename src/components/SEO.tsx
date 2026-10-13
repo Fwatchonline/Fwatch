@@ -18,7 +18,7 @@ export function SEO({
 }: SEOProps) {
   useEffect(() => {
     // Set document title
-    document.title = title.includes('FWATCH') ? title : `${title} | FWATCH`;
+    document.title = title.includes('Tstream') ? title : `${title} | Tstream`;
 
     // Helper to update or create meta tags
     const setMeta = (name: string, content: string, isProperty = false) => {
@@ -45,7 +45,7 @@ export function SEO({
     setMeta('og:description', description, true);
     setMeta('og:type', ogType, true);
     setMeta('og:url', resolvedUrl, true);
-    setMeta('og:site_name', 'FWATCH', true);
+    setMeta('og:site_name', 'Tstream', true);
 
     const defaultImage = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&auto=format&fit=crop&q=80';
     setMeta('og:image', ogImage || defaultImage, true);
@@ -97,7 +97,7 @@ export function SEO({
       schemasToInject.push({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'FWATCH',
+        name: 'Tstream',
         url: window.location.origin,
         potentialAction: {
           '@type': 'SearchAction',

@@ -88,7 +88,7 @@ export function MovieInfoPanel({
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md text-[10px] font-black text-[#F5C518] px-2 py-0.5 rounded border border-[#F5C518]/30 uppercase tracking-wider">
+            <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md text-[10px] font-black text-[#E50914] px-2 py-0.5 rounded border border-red-500/30 uppercase tracking-wider">
               {item.quality || '4K UHD'}
             </div>
           </div>
@@ -99,7 +99,7 @@ export function MovieInfoPanel({
           {/* Header Row: Title & Release Year */}
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="text-[11px] font-bold text-[#F5C518] uppercase tracking-wider px-2 py-0.5 rounded bg-[#F5C518]/10 border border-[#F5C518]/20">
+              <span className="text-[11px] font-bold text-[#E50914] uppercase tracking-wider px-2 py-0.5 rounded bg-red-950/60 border border-red-500/30">
                 {isMovie ? 'Movie' : `Season ${seasonNumber || 1} • Episode ${episodeNumber || 1}`}
               </span>
               <span className="text-xs text-[#707684]">·</span>
@@ -169,12 +169,12 @@ export function MovieInfoPanel({
               onClick={onToggleLike}
               className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 liked
-                  ? 'bg-[#F5C518] border-[#F5C518] text-black shadow-md shadow-[#F5C518]/25'
+                  ? 'bg-[#E50914] border-[#E50914] text-white shadow-md shadow-red-900/30'
                   : 'bg-[#161922] border-white/10 hover:border-white/20 text-[#A1A7B5] hover:text-white'
               }`}
               title="Like this title"
             >
-              <ThumbsUp className={`w-3.5 h-3.5 ${liked ? 'fill-black' : ''}`} />
+              <ThumbsUp className={`w-3.5 h-3.5 ${liked ? 'fill-white' : ''}`} />
               <span>{likesCount}</span>
             </button>
 
@@ -202,10 +202,10 @@ export function MovieInfoPanel({
             <button
               type="button"
               onClick={onDownload}
-              className="px-3 py-2 rounded-xl bg-[#161922] border border-white/10 hover:border-white/20 text-[#A1A7B5] hover:text-[#F5C518] transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-[#161922] border border-white/10 hover:border-white/20 text-[#A1A7B5] hover:text-[#E50914] transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
               title="Download offline streams"
             >
-              <Download className="w-3.5 h-3.5 text-[#F5C518]" />
+              <Download className="w-3.5 h-3.5 text-[#E50914]" />
               <span className="hidden sm:inline">Download</span>
             </button>
 
@@ -215,8 +215,8 @@ export function MovieInfoPanel({
               onClick={onToggleWatchlist}
               className={`ml-auto px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md ${
                 isSaved
-                  ? 'bg-[#18C98B] hover:bg-[#15B07A] text-black shadow-[#18C98B]/20'
-                  : 'bg-[#F5C518] hover:bg-[#FFD633] text-black shadow-[#F5C518]/25'
+                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/30'
+                  : 'bg-[#E50914] hover:bg-[#B81D24] text-white shadow-red-900/30'
               }`}
             >
               {isSaved ? (

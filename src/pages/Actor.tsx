@@ -58,7 +58,7 @@ export function Actor() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export function Actor() {
     return (
       <div className="text-center py-20">
         <h2 className="text-2xl font-bold text-white mb-2">Artist Not Found</h2>
-        <Link to="/artists" className="text-[#F5C518] font-semibold hover:underline">
+        <Link to="/artists" className="text-[#E50914] font-semibold hover:underline">
           Return to Artists
         </Link>
       </div>
@@ -88,8 +88,8 @@ export function Actor() {
   return (
     <div className="space-y-8 py-4">
       <SEO
-        title={`${person.name} - T.Movie`}
-        description={person.biography?.slice(0, 150) || `Explore ${person.name}'s filmography on T.Movie.`}
+        title={`${person.name} - Tstream`}
+        description={person.biography?.slice(0, 150) || `Explore ${person.name}'s filmography on Tstream.`}
       />
 
       {/* Top Hero Section */}
@@ -107,7 +107,7 @@ export function Actor() {
         <div className="flex-1 space-y-4 relative z-10">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#F5C518] tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#E50914] tracking-tight">
                 {person.name}
               </h1>
               <p className="text-sm font-semibold text-neutral-400 mt-1">
@@ -124,13 +124,13 @@ export function Actor() {
           <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-400 pt-2">
             {person.placeOfBirth && (
               <span className="flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-[#F5C518]" />
+                <Globe className="w-4 h-4 text-[#E50914]" />
                 {person.placeOfBirth}
               </span>
             )}
             {person.birthday && (
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-[#F5C518]" />
+                <Calendar className="w-4 h-4 text-[#E50914]" />
                 {person.birthday}
               </span>
             )}
@@ -148,12 +148,12 @@ export function Actor() {
               type="button"
               onClick={() => setActiveTab(tab)}
               className={`py-3 relative transition-colors cursor-pointer ${
-                isActive ? 'text-[#F5C518]' : 'text-neutral-400 hover:text-white'
+                isActive ? 'text-[#E50914]' : 'text-neutral-400 hover:text-white'
               }`}
             >
               <span>{tab}</span>
               {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F5C518] rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E50914] rounded-full shadow-sm shadow-red-900/50" />
               )}
             </button>
           );
@@ -176,7 +176,7 @@ export function Actor() {
                     type="button"
                     onClick={() => setWorksFilter(filter)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                      isActive ? 'bg-[#F5C518] text-black shadow' : 'text-neutral-400 hover:text-white'
+                      isActive ? 'bg-[#E50914] text-white shadow shadow-red-900/40' : 'text-neutral-400 hover:text-white'
                     }`}
                   >
                     {filter}
@@ -220,7 +220,7 @@ export function Actor() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12 text-xs sm:text-sm">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <span className="text-neutral-400 flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#F5C518]" />
+                <Users className="w-4 h-4 text-[#E50914]" />
                 Full Name
               </span>
               <span className="font-semibold text-white">{person.name}</span>
@@ -228,7 +228,7 @@ export function Actor() {
 
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <span className="text-neutral-400 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#F5C518]" />
+                <Calendar className="w-4 h-4 text-[#E50914]" />
                 Birthday
               </span>
               <span className="font-semibold text-white">{person.birthday || 'N/A'}</span>
@@ -236,7 +236,7 @@ export function Actor() {
 
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <span className="text-neutral-400 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-[#F5C518]" />
+                <Globe className="w-4 h-4 text-[#E50914]" />
                 Place of Birth
               </span>
               <span className="font-semibold text-white">{person.placeOfBirth || 'N/A'}</span>
@@ -244,7 +244,7 @@ export function Actor() {
 
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <span className="text-neutral-400 flex items-center gap-2">
-                <Award className="w-4 h-4 text-[#F5C518]" />
+                <Award className="w-4 h-4 text-[#E50914]" />
                 Known Department
               </span>
               <span className="font-semibold text-white">{person.knownForDepartment || 'Acting'}</span>

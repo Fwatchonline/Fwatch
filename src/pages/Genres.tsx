@@ -9,8 +9,8 @@ export function Genres() {
   return (
     <div className="min-h-screen bg-[#08090c] pt-24 pb-16">
       <SEO
-        title="Movie &amp; TV Genres - Browse Catalog | FWATCH"
-        description="Browse FWATCH streaming library by categories: Action, Comedy, Sci-Fi, Horror, Drama, Animation, and more."
+        title="Movie &amp; TV Genres - Browse Catalog | Tstream"
+        description="Browse Tstream streaming library by categories: Action, Comedy, Sci-Fi, Horror, Drama, Animation, and more."
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'Genres', item: '/genres' },
@@ -19,7 +19,7 @@ export function Genres() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex items-center gap-2.5 pb-6 border-b border-white/10">
-          <div className="p-2 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25">
+          <div className="p-2 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/30">
             <Compass className="w-6 h-6" />
           </div>
           <div>

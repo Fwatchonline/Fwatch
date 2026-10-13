@@ -47,9 +47,9 @@ export function DownloadModal({
         <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-[#F5C518] text-black text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3 h-3 fill-black" />
-                <span>Vyla SDK Direct Downloads</span>
+              <span className="px-2 py-0.5 rounded-md bg-[#E50914] text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                <Sparkles className="w-3 h-3 fill-white" />
+                <span>Direct High-Speed Downloads</span>
               </span>
             </div>
             <h3 className="text-xl font-black text-white tracking-tight">
@@ -74,9 +74,9 @@ export function DownloadModal({
         {/* Content */}
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center gap-3">
-            <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin" />
             <p className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
-              Fetching direct high-speed streams from Vyla SDK...
+              Fetching direct high-speed streams...
             </p>
           </div>
         ) : downloads.length > 0 ? (
@@ -88,14 +88,14 @@ export function DownloadModal({
                 target="_blank"
                 rel="noopener noreferrer"
                 download
-                className="flex items-center justify-between p-4 rounded-2xl bg-[#1b1c24] hover:bg-[#22242e] border border-white/5 hover:border-[#F5C518]/50 transition-all group"
+                className="flex items-center justify-between p-4 rounded-2xl bg-[#1b1c24] hover:bg-[#22242e] border border-white/5 hover:border-[#E50914]/50 transition-all group"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-[#F5C518]/10 text-[#F5C518] flex items-center justify-center group-hover:bg-[#F5C518] group-hover:text-black transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-red-950/60 text-[#E50914] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-colors">
                     <Download className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-[#F5C518] transition-colors">
+                    <h4 className="text-sm font-bold text-white group-hover:text-[#E50914] transition-colors">
                       {item.label}
                     </h4>
                     <p className="text-[11px] text-neutral-400 flex items-center gap-2">
@@ -110,7 +110,7 @@ export function DownloadModal({
                   <span className="px-2.5 py-1 rounded-lg bg-black/40 text-neutral-300 text-xs font-black">
                     {item.quality}
                   </span>
-                  <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-[#F5C518]" />
+                  <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-[#E50914]" />
                 </div>
               </a>
             ))}

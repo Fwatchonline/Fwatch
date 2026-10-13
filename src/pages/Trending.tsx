@@ -56,8 +56,8 @@ export function Trending() {
   return (
     <div className="min-h-screen bg-[#08090c] pt-24 pb-16">
       <SEO
-        title="Trending Today &amp; This Week - Top Movies &amp; TV | FWATCH"
-        description="See what the world is watching right now. Daily and weekly trending movies and series on FWATCH."
+        title="Trending Today &amp; This Week - Top Movies &amp; TV | Tstream"
+        description="See what the world is watching right now. Daily and weekly trending movies and series on Tstream."
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'Trending', item: '/trending' },
@@ -68,8 +68,8 @@ export function Trending() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25">
-                <Flame className="w-6 h-6 fill-[#F5C518]/20" />
+              <div className="p-2 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/30">
+                <Flame className="w-6 h-6 fill-[#E50914]/20" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white tracking-wide">
@@ -90,7 +90,7 @@ export function Trending() {
                 onClick={() => setTimeWindow('day')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   timeWindow === 'day'
-                    ? 'bg-[#F5C518] text-black font-extrabold shadow'
+                    ? 'bg-[#E50914] text-white font-extrabold shadow shadow-red-900/40'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -101,7 +101,7 @@ export function Trending() {
                 onClick={() => setTimeWindow('week')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   timeWindow === 'week'
-                    ? 'bg-[#F5C518] text-black font-extrabold shadow'
+                    ? 'bg-[#E50914] text-white font-extrabold shadow shadow-red-900/40'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -144,7 +144,7 @@ export function Trending() {
 
         {loading ? (
           <div className="py-24 flex justify-center">
-            <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : items.length === 0 ? (
           <div className="py-20 text-center rounded-3xl bg-[#16171E] border border-white/5 p-8">

@@ -24,6 +24,8 @@ import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { EmbedPlayer } from './pages/EmbedPlayer';
 import { EmbedApiDocs } from './pages/EmbedApiDocs';
+import { Studio } from './pages/Studio';
+import { Country } from './pages/Country';
 import { NotFound } from './pages/NotFound';
 
 function ScrollToTop() {
@@ -53,7 +55,7 @@ export default function App() {
           />
           <Route path="/embed/tv/:id" element={<EmbedPlayer type="tv" />} />
 
-          {/* Standard T.Movie Layout (Sidebar + TopNav + Content + Footer) */}
+          {/* Standard Tstream Layout (Sidebar + TopNav + Content + Footer) */}
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/api" element={<EmbedApiDocs />} />
@@ -80,6 +82,11 @@ export default function App() {
             />
             <Route path="/search" element={<Search />} />
             <Route path="/filter" element={<Search />} />
+            <Route path="/studio/:slug" element={<Studio />} />
+            <Route path="/company/:slug" element={<Studio />} />
+            <Route path="/production/:slug" element={<Studio />} />
+            <Route path="/country/:slug" element={<Country />} />
+            <Route path="/country" element={<Country />} />
             <Route path="/people" element={<Artists />} />
             <Route path="/artists" element={<Artists />} />
             <Route path="/actor/:slug" element={<Actor />} />

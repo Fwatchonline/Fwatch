@@ -18,11 +18,11 @@ export function UserDropdown() {
         <img
           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
           alt="Sebastian_W"
-          className="w-10 h-10 rounded-full object-cover border-2 border-[#F5C518]"
+          className="w-10 h-10 rounded-full object-cover border-2 border-[#E50914]"
         />
         <div className="min-w-0 flex-1">
           <h4 className="text-sm font-bold text-white truncate">Sebastian_W</h4>
-          <span className="text-[11px] font-semibold text-[#F5C518]">VIP Member</span>
+          <span className="text-[11px] font-semibold text-[#E50914]">VIP Member</span>
         </div>
       </div>
 
@@ -62,7 +62,7 @@ export function UserDropdown() {
             setUserDropdownOpen(false);
             navigate('/login');
           }}
-          className="w-full py-2 px-3 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-bold transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2 px-3 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-md shadow-red-900/30 cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>

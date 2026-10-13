@@ -90,7 +90,7 @@ export function TrendingSeriesSlider({ items }: TrendingSeriesSliderProps) {
       <div className="relative z-10 max-w-2xl space-y-4">
         {/* Category Pill / Tag */}
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F5C518] text-black text-[11px] font-black uppercase tracking-wider shadow-md shadow-[#F5C518]/25">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E50914] text-white text-[11px] font-black uppercase tracking-wider shadow-md shadow-red-900/40">
             <Tv className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>TRENDING SERIES</span>
           </span>
@@ -132,18 +132,18 @@ export function TrendingSeriesSlider({ items }: TrendingSeriesSliderProps) {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
-            onClick={() => navigate(watchUrl)}
-            className="py-2.5 px-6 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+            onClick={() => navigate(detailUrl)}
+            className="py-2.5 px-6 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
           >
-            <Play className="w-4 h-4 fill-black" />
+            <Play className="w-4 h-4 fill-white" />
             <span>WATCH</span>
           </button>
 
           <Link
             to={detailUrl}
-            className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-[#F5C518]/40 hover:border-[#F5C518] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
+            className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-white/20 hover:border-[#E50914] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <Info className="w-4 h-4 text-[#F5C518]" />
+            <Info className="w-4 h-4 text-neutral-300" />
             <span>Details &amp; Trailer</span>
           </Link>
         </div>
@@ -155,7 +155,7 @@ export function TrendingSeriesSlider({ items }: TrendingSeriesSliderProps) {
           type="button"
           onClick={handlePrev}
           aria-label="Previous series"
-          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
+          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -163,7 +163,7 @@ export function TrendingSeriesSlider({ items }: TrendingSeriesSliderProps) {
           type="button"
           onClick={handleNext}
           aria-label="Next series"
-          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
+          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -250,7 +250,7 @@ export function LatestEpisodesSlider({ items }: LatestEpisodesSliderProps) {
       <div className="relative z-10 max-w-2xl space-y-4">
         {/* Category Pill / Tag */}
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#F5C518] text-black text-[11px] font-black uppercase tracking-wider shadow">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E50914] text-white text-[11px] font-black uppercase tracking-wider shadow shadow-red-900/40">
             <Sparkles className="w-3 h-3" />
             <span>LATEST EPISODES</span>
           </span>
@@ -261,7 +261,7 @@ export function LatestEpisodesSlider({ items }: LatestEpisodesSliderProps) {
 
         {/* Show Title & Episode Title */}
         <div>
-          <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#F5C518]">
+          <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#E50914]">
             {current.showTitle}
           </span>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight drop-shadow-md mt-1">
@@ -302,18 +302,18 @@ export function LatestEpisodesSlider({ items }: LatestEpisodesSliderProps) {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
-            onClick={() => navigate(watchUrl)}
-            className="py-2.5 px-6 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+            onClick={() => navigate(detailUrl)}
+            className="py-2.5 px-6 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
           >
-            <Play className="w-4 h-4 fill-black" />
+            <Play className="w-4 h-4 fill-white" />
             <span>WATCH EPISODE</span>
           </button>
 
           <Link
             to={detailUrl}
-            className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-[#F5C518]/40 hover:border-[#F5C518] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
+            className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-white/20 hover:border-[#E50914] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <Info className="w-4 h-4 text-[#F5C518]" />
+            <Info className="w-4 h-4 text-neutral-300" />
             <span>Series Details</span>
           </Link>
         </div>
@@ -325,7 +325,7 @@ export function LatestEpisodesSlider({ items }: LatestEpisodesSliderProps) {
           type="button"
           onClick={handlePrev}
           aria-label="Previous episode"
-          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
+          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -333,7 +333,7 @@ export function LatestEpisodesSlider({ items }: LatestEpisodesSliderProps) {
           type="button"
           onClick={handleNext}
           aria-label="Next episode"
-          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
+          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -428,7 +428,7 @@ export function ImdbPopularMoviesSlider({ items }: ImdbPopularMoviesSliderProps)
       <div className="relative z-10 max-w-2xl space-y-4">
         {/* Category Pill / Tag */}
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#F5C518] text-black text-[11px] font-black uppercase tracking-wider shadow">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E50914] text-white text-[11px] font-black uppercase tracking-wider shadow shadow-red-900/40">
             <Film className="w-3 h-3" />
             <span>IMDb POPULAR MOVIES</span>
           </span>
@@ -470,18 +470,18 @@ export function ImdbPopularMoviesSlider({ items }: ImdbPopularMoviesSliderProps)
         <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
-            onClick={() => navigate(watchUrl)}
-            className="py-2.5 px-6 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+            onClick={() => navigate(detailUrl)}
+            className="py-2.5 px-6 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
           >
-            <Play className="w-4 h-4 fill-black" />
+            <Play className="w-4 h-4 fill-white" />
             <span>WATCH</span>
           </button>
 
           <Link
             to={detailUrl}
-            className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-[#F5C518]/40 hover:border-[#F5C518] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
+            className="py-2.5 px-6 rounded-xl bg-black/40 hover:bg-black/60 border border-white/20 hover:border-[#E50914] text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
           >
-            <Info className="w-4 h-4 text-[#F5C518]" />
+            <Info className="w-4 h-4 text-neutral-300" />
             <span>Details &amp; Trailer</span>
           </Link>
         </div>
@@ -493,7 +493,7 @@ export function ImdbPopularMoviesSlider({ items }: ImdbPopularMoviesSliderProps)
           type="button"
           onClick={handlePrev}
           aria-label="Previous movie"
-          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
+          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -501,7 +501,7 @@ export function ImdbPopularMoviesSlider({ items }: ImdbPopularMoviesSliderProps)
           type="button"
           onClick={handleNext}
           aria-label="Next movie"
-          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
+          className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all shadow cursor-pointer active:scale-95"
         >
           <ChevronRight className="w-5 h-5" />
         </button>

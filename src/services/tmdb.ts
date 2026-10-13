@@ -1,4 +1,4 @@
-import { MediaItem, TMDBEpisode, TMDBSeason, TMDBPerson, TMDBGenre } from '../types';
+import { MediaItem, TMDBEpisode, TMDBSeason, TMDBPerson, TMDBGenre, TMDBCompany } from '../types';
 import { CURATED_MOVIES, CURATED_TV_SHOWS, CURATED_EPISODES, CURATED_ACTORS, GENRES_LIST } from './curatedData';
 import { parseSlug, generateMediaSlug, slugify } from '../utils/slugify';
 
@@ -622,5 +622,289 @@ export const tmdbService = {
       totalPages: 1,
       totalResults: filtered.length,
     };
+  },
+
+  // -----------------------------------------------------------------
+  // VIEW COUNTER (Real view counting, incrementing +1 on open)
+  // -----------------------------------------------------------------
+  async recordView(type: 'movie' | 'tv' | 'anime', id: number | string): Promise<number> {
+    const key = `view_${type}_${id}`;
+    try {
+      const res = await fetch(`/api/views/${type}/${id}`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.views === 'number') {
+          try {
+            localStorage.setItem(key, String(data.views));
+          } catch {}
+          return data.views;
+        }
+      }
+    } catch (_e) {
+      // offline fallback
+    }
+
+    // Local storage fallback
+    const local = Number(localStorage.getItem(key) || 0) + 1;
+    try {
+      localStorage.setItem(key, String(local));
+    } catch {}
+    return local;
+  },
+
+  async getViewCount(type: 'movie' | 'tv', id: number | string): Promise<number> {
+    const key = `view_${type}_${id}`;
+    const cached = localStorage.getItem(key);
+    if (cached) {
+      return Number(cached);
+    }
+
+    try {
+      const res = await fetch(`/api/views/${type}/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.views === 'number') {
+          try {
+            localStorage.setItem(key, String(data.views));
+          } catch {}
+          return data.views;
+        }
+      }
+    } catch (_e) {}
+
+    return 200;
+  },
+
+  // -----------------------------------------------------------------
+  // PRODUCTION COMPANIES / STUDIOS
+  // -----------------------------------------------------------------
+  async getCompanyDetails(companyId: number): Promise<TMDBCompany | null> {
+    return fetchFromApi<TMDBCompany>(`/company/${companyId}`);
+  },
+
+  async searchCompany(name: string): Promise<{ id: number; name: string; logoPath: string | null; originCountry: string }[]> {
+    const raw = await fetchFromApi<{ results: any[] }>(`/search/company?query=${encodeURIComponent(name.trim())}`);
+    return raw?.results || [];
+  },
+
+  async getCompanyTitles(
+    companyId: number,
+    page: number = 1
+  ): Promise<{
+    company: TMDBCompany;
+    movies: MediaItem[];
+    tv: MediaItem[];
+    all: MediaItem[];
+    totalMovies: number;
+    totalTv: number;
+    totalResults: number;
+    page: number;
+  }> {
+    const res = await fetchFromApi<any>(`/company/${companyId}/titles?page=${page}`);
+    if (res && res.company) {
+      return res;
+    }
+
+    // Fallback if proxy misses
+    const [moviesData, tvData, companyData] = await Promise.all([
+      fetchFromApi<{ results: MediaItem[]; total_results: number }>(`/discover/movie?with_companies=${companyId}&page=${page}`),
+      fetchFromApi<{ results: MediaItem[]; total_results: number }>(`/discover/tv?with_companies=${companyId}&page=${page}`),
+      fetchFromApi<TMDBCompany>(`/company/${companyId}`),
+    ]);
+
+    const movies = moviesData?.results || [];
+    const tv = tvData?.results || [];
+    const all = [...movies, ...tv].sort((a, b) => (b.imdbRating || b.voteAverage || 0) - (a.imdbRating || a.voteAverage || 0));
+
+    return {
+      company: companyData || { id: companyId, name: `Studio #${companyId}`, logoPath: null },
+      movies,
+      tv,
+      all,
+      totalMovies: moviesData?.total_results || movies.length,
+      totalTv: tvData?.total_results || tv.length,
+      totalResults: (moviesData?.total_results || movies.length) + (tvData?.total_results || tv.length),
+      page,
+    };
+  },
+
+  async resolveCompany(slugOrId: string): Promise<{ id: number; name?: string } | null> {
+    if (!slugOrId) return null;
+    const clean = slugOrId.trim();
+
+    // Check if starts with a number e.g. "3172-blumhouse-productions" or "3172"
+    const match = clean.match(/^(\d+)(?:-(.*))?$/);
+    if (match) {
+      return { id: Number(match[1]), name: match[2]?.replace(/-/g, ' ') };
+    }
+
+    // Well-known studio registry
+    const KNOWN_STUDIOS: Record<string, { id: number; name: string }> = {
+      'dc-studios': { id: 128064, name: 'DC Studios' },
+      'dc-films': { id: 9993, name: 'DC Films' },
+      'dc-entertainment': { id: 9993, name: 'DC Entertainment' },
+      'hbo': { id: 3268, name: 'HBO' },
+      'hbo-entertainment': { id: 3268, name: 'HBO Entertainment' },
+      'warner-bros-television': { id: 1957, name: 'Warner Bros. Television' },
+      'warner-bros': { id: 174, name: 'Warner Bros. Pictures' },
+      'warner-bros-pictures': { id: 174, name: 'Warner Bros. Pictures' },
+      'tea-shop-productions': { id: 17997, name: 'Tea Shop Productions' },
+      'under-the-shell': { id: 149488, name: 'Under the Shell' },
+      'capstone-pictures': { id: 89311, name: 'Capstone Pictures' },
+      'capstone-studios': { id: 89311, name: 'Capstone Studios' },
+      'blumhouse-productions': { id: 3172, name: 'Blumhouse Productions' },
+      'blumhouse': { id: 3172, name: 'Blumhouse Productions' },
+      'marvel-studios': { id: 420, name: 'Marvel Studios' },
+      'columbia-pictures': { id: 5, name: 'Columbia Pictures' },
+      'a24': { id: 41077, name: 'A24' },
+      'universal-pictures': { id: 33, name: 'Universal Pictures' },
+      'paramount-pictures': { id: 4, name: 'Paramount Pictures' },
+      'walt-disney-pictures': { id: 2, name: 'Walt Disney Pictures' },
+      'disney': { id: 2, name: 'Walt Disney Pictures' },
+      'pixar': { id: 3, name: 'Pixar' },
+      'lucasfilm': { id: 1, name: 'Lucasfilm Ltd.' },
+      '20th-century-studios': { id: 25, name: '20th Century Studios' },
+      'lionsgate': { id: 1632, name: 'Lionsgate' },
+      'sony-pictures': { id: 34, name: 'Sony Pictures' },
+      'studio-ghibli': { id: 10342, name: 'Studio Ghibli' },
+      'bad-robot': { id: 11461, name: 'Bad Robot' },
+      'syncopy': { id: 9996, name: 'Syncopy' },
+      'plan-b-entertainment': { id: 81, name: 'Plan B Entertainment' },
+      'working-title-films': { id: 10163, name: 'Working Title Films' },
+      'amblin-entertainment': { id: 56, name: 'Amblin Entertainment' },
+    };
+
+    const normalized = slugify(clean);
+    if (KNOWN_STUDIOS[normalized]) {
+      return KNOWN_STUDIOS[normalized];
+    }
+
+    // Search via TMDB API
+    const found = await this.searchCompany(clean.replace(/-/g, ' '));
+    if (found && found.length > 0) {
+      return { id: found[0].id, name: found[0].name };
+    }
+
+    return null;
+  },
+
+  // -----------------------------------------------------------------
+  // COUNTRY TITLES (Movies and TV Series produced/filmed in a country)
+  // -----------------------------------------------------------------
+  async getTitlesByCountry(
+    countryCodeOrSlug: string,
+    page: number = 1,
+    type: 'all' | 'movie' | 'tv' = 'all',
+    sortBy: string = 'popularity.desc',
+    genreId?: number | string
+  ): Promise<{
+    country: { code: string; name: string; shortName: string; slug: string; flag: string };
+    results: MediaItem[];
+    movies: MediaItem[];
+    tv: MediaItem[];
+    all: MediaItem[];
+    totalMovies: number;
+    totalTv: number;
+    totalResults: number;
+    totalPages: number;
+    page: number;
+  }> {
+    const q = new URLSearchParams({
+      page: String(page),
+      type,
+      sort_by: sortBy,
+    });
+    if (genreId) q.set('with_genres', String(genreId));
+
+    const data = await fetchFromApi<{
+      country: { code: string; name: string; shortName: string; slug: string; flag: string };
+      results: MediaItem[];
+      movies: MediaItem[];
+      tv: MediaItem[];
+      all: MediaItem[];
+      totalMovies: number;
+      totalTv: number;
+      totalResults: number;
+      totalPages: number;
+      page: number;
+    }>(`/country/${encodeURIComponent(countryCodeOrSlug)}/titles?${q.toString()}`);
+
+    if (data && data.results) {
+      return data;
+    }
+
+    return {
+      country: {
+        code: 'US',
+        name: 'United States of America',
+        shortName: 'United States',
+        slug: 'united-states',
+        flag: '🇺🇸',
+      },
+      results: CURATED_MOVIES,
+      movies: CURATED_MOVIES,
+      tv: CURATED_TV_SHOWS,
+      all: [...CURATED_MOVIES, ...CURATED_TV_SHOWS],
+      totalMovies: CURATED_MOVIES.length,
+      totalTv: CURATED_TV_SHOWS.length,
+      totalResults: CURATED_MOVIES.length + CURATED_TV_SHOWS.length,
+      totalPages: 1,
+      page: 1,
+    };
+  },
+
+  // -----------------------------------------------------------------
+  // EPISODES AIRING TODAY (For notifications)
+  // -----------------------------------------------------------------
+  async getEpisodesAiringToday(): Promise<
+    {
+      id: string;
+      title: string;
+      mediaTitle: string;
+      episodeName?: string;
+      type: 'episode';
+      time: string;
+      image: string;
+      read: boolean;
+      link: string;
+      seasonNumber?: number;
+      episodeNumber?: number;
+    }[]
+  > {
+    const data = await fetchFromApi<
+      {
+        id: string;
+        title: string;
+        mediaTitle: string;
+        episodeName?: string;
+        type: 'episode';
+        time: string;
+        image: string;
+        read: boolean;
+        link: string;
+        seasonNumber?: number;
+        episodeNumber?: number;
+      }[]
+    >('/tv/airing_today');
+
+    if (data && Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+
+    return CURATED_EPISODES.slice(0, 6).map((ep) => ({
+      id: `today-curated-${ep.id}`,
+      title: `Season ${ep.seasonNumber}, Episode ${ep.episodeNumber} released today`,
+      mediaTitle: ep.showTitle,
+      episodeName: ep.name,
+      type: 'episode',
+      time: 'Today',
+      image: ep.stillPath
+        ? `https://image.tmdb.org/t/p/w500${ep.stillPath}`
+        : 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500',
+      read: false,
+      link: `/tv/${ep.showSlug}/season/${ep.seasonNumber}/episode/${ep.episodeNumber}`,
+      seasonNumber: ep.seasonNumber,
+      episodeNumber: ep.episodeNumber,
+    }));
   },
 };

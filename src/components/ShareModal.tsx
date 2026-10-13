@@ -32,7 +32,7 @@ export function ShareModal({ isOpen, onClose, title, url }: ShareModalProps) {
         </button>
 
         <div className="flex items-center gap-2.5 mb-4">
-          <div className="p-2 rounded-xl bg-[#F5C518]/15 text-[#F5C518] border border-[#F5C518]/25">
+          <div className="p-2 rounded-xl bg-red-950/60 text-[#E50914] border border-red-500/40">
             <Share2 className="w-5 h-5" />
           </div>
           <div>
@@ -52,7 +52,7 @@ export function ShareModal({ isOpen, onClose, title, url }: ShareModalProps) {
             <button
               type="button"
               onClick={handleCopy}
-              className="p-1.5 rounded-md bg-[#F5C518] text-black font-extrabold hover:bg-[#E5B508] transition-colors cursor-pointer"
+              className="p-1.5 rounded-md bg-[#E50914] text-white font-extrabold hover:bg-[#B81D24] transition-colors cursor-pointer"
               title="Copy link"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}

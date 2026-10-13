@@ -58,6 +58,19 @@ export interface MediaItem {
   trailerKey?: string;
   cast?: TMDBCastMember[];
   crew?: TMDBCrewMember[];
+  director?: string;
+  writer?: string;
+  budget?: number;
+  revenue?: number;
+  language?: string;
+  productionCompanies?: { id: number; name: string; logoPath: string | null }[];
+  collection?: { id: number; name: string; posterPath: string | null; backdropPath: string | null; parts?: MediaItem[] };
+  keywords?: string[];
+  videosList?: TMDBVideo[];
+  homepage?: string;
+  views?: number;
+  network?: string;
+  networks?: { id: number; name: string; logoPath: string | null }[];
 }
 
 export interface TMDBEpisode {
@@ -107,6 +120,17 @@ export interface TMDBPerson {
   knownFor: MediaItem[];
   movieCredits: MediaItem[];
   tvCredits: MediaItem[];
+}
+
+export interface TMDBCompany {
+  id: number;
+  name: string;
+  description?: string;
+  headquarters?: string;
+  homepage?: string;
+  logoPath?: string | null;
+  originCountry?: string;
+  parentCompany?: { id: number; name: string; logoPath: string | null } | null;
 }
 
 export interface StreamQuality {

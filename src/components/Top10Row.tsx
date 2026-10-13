@@ -27,8 +27,8 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-[#F5C518]/15 border border-[#F5C518]/30">
-            <Flame className="w-5 h-5 text-[#F5C518]" />
+          <div className="p-2 rounded-xl bg-red-950/60 border border-red-500/30">
+            <Flame className="w-5 h-5 text-[#E50914]" />
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-wide flex items-center gap-2">
@@ -47,7 +47,7 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
               onClick={() => setActiveTab('movie')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'movie'
-                  ? 'bg-[#F5C518] text-black font-black shadow-md shadow-[#F5C518]/20'
+                  ? 'bg-[#E50914] text-white font-black shadow-md shadow-red-900/40'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -58,7 +58,7 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
               onClick={() => setActiveTab('tv')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'tv'
-                  ? 'bg-[#F5C518] text-black font-black shadow-md shadow-[#F5C518]/20'
+                  ? 'bg-[#E50914] text-white font-black shadow-md shadow-red-900/40'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -109,7 +109,7 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
               >
                 {/* Giant Stylized Rank Number */}
                 <div
-                  className="bebas-font text-8xl sm:text-9xl md:text-[140px] font-black leading-none select-none -mr-4 sm:-mr-6 z-0 text-transparent transition-all duration-300 group-hover:text-[#F5C518]/25"
+                  className="bebas-font text-8xl sm:text-9xl md:text-[140px] font-black leading-none select-none -mr-4 sm:-mr-6 z-0 text-transparent transition-all duration-300 group-hover:text-[#E50914]/25"
                   style={{
                     WebkitTextStroke: '3px rgba(255, 255, 255, 0.28)',
                     transform: 'translateY(16px)',
@@ -119,7 +119,7 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
                 </div>
 
                 {/* Poster Card */}
-                <div className="relative w-36 sm:w-44 md:w-48 aspect-[2/3] rounded-xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#F5C518] shadow-2xl transition-all duration-300 z-10 group-hover:scale-105 group-hover:shadow-[#F5C518]/20">
+                <div className="relative w-36 sm:w-44 md:w-48 aspect-[2/3] rounded-xl overflow-hidden bg-[#151820] border border-white/10 group-hover:border-[#E50914] shadow-2xl transition-all duration-300 z-10 group-hover:scale-105 group-hover:shadow-red-900/30">
                   <img
                     src={getTMDBImageUrl(item.posterPath, 'w500')}
                     alt={item.title}
@@ -134,7 +134,7 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
                   </div>
 
                   {/* Top Badge */}
-                  <div className="absolute top-2 left-2 bg-[#F5C518] text-black text-[10px] font-black px-1.5 py-0.5 rounded shadow">
+                  <div className="absolute top-2 left-2 bg-[#E50914] text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow shadow-red-900/50">
                     #{index + 1}
                   </div>
 
@@ -149,10 +149,10 @@ export function Top10Row({ movieItems, tvItems }: Top10RowProps) {
                     </div>
                     <div className="flex items-center gap-2 pt-1">
                       <Link
-                        to={watchUrl}
-                        className="flex-1 py-1.5 bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs font-extrabold rounded-lg flex items-center justify-center gap-1 shadow shadow-[#F5C518]/20"
+                        to={detailUrl}
+                        className="flex-1 py-1.5 bg-[#E50914] hover:bg-[#B81D24] text-white text-xs font-extrabold rounded-lg flex items-center justify-center gap-1 shadow-md shadow-red-900/40"
                       >
-                        <Play className="w-3.5 h-3.5 fill-black" />
+                        <Play className="w-3.5 h-3.5 fill-white" />
                         <span>Watch</span>
                       </Link>
                       <Link

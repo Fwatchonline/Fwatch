@@ -169,7 +169,7 @@ export function Anime() {
   return (
     <div className="space-y-8 py-4">
       <SEO
-        title="Anime - Stream Anime Movies, Series & OVA | AniList - T.Movie"
+        title="Anime - Stream Anime Movies, Series & OVA | AniList - Tstream"
         description="Stream top anime movies, television series, OVAs, and ONAs powered by AniList. Explore popular, trending, and seasonal anime releases."
       />
 
@@ -177,8 +177,8 @@ export function Anime() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-[#F5C518] text-black text-[11px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md shadow-[#F5C518]/25">
-              <Sparkles className="w-3 h-3 fill-black" />
+            <span className="px-2.5 py-0.5 rounded-full bg-[#E50914] text-white text-[11px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md shadow-red-900/40">
+              <Sparkles className="w-3 h-3 fill-white" />
               <span>AniList Integration</span>
             </span>
             <span className="text-xs text-neutral-400 font-medium">
@@ -197,7 +197,7 @@ export function Anime() {
         {/* Total results badge */}
         {pageInfo.total > 0 && (
           <div className="self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-[#16171E] border border-white/10 text-xs font-bold text-neutral-300">
-            <span className="text-[#F5C518] font-extrabold mr-1">
+            <span className="text-[#E50914] font-extrabold mr-1">
               {pageInfo.total.toLocaleString()}
             </span>
             <span>Titles</span>
@@ -231,10 +231,10 @@ export function Anime() {
           {/* Hero Content */}
           <div className="relative z-10 max-w-2xl space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-[#F5C518] text-black text-[10px] font-black uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md bg-[#E50914] text-white text-[10px] font-black uppercase tracking-wider">
                 FEATURED ANIME
               </span>
-              <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[#F5C518] border border-white/10 text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white border border-white/10 text-[10px] font-bold">
                 {currentHero.format}
               </span>
               {currentHero.averageScore && (
@@ -271,12 +271,12 @@ export function Anime() {
                     `/anime/${generateAnimeSlug(
                       currentHero.id,
                       currentHero.title.english || currentHero.title.romaji
-                    )}?watch=1`
+                    )}`
                   )
                 }
-                className="py-2.5 px-6 rounded-xl bg-[#F5C518] hover:bg-[#E5B508] text-black text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-[#F5C518]/25 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
+                className="py-2.5 px-6 rounded-xl bg-[#E50914] hover:bg-[#B81D24] text-white text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-red-900/40 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
               >
-                <Play className="w-4 h-4 fill-black" />
+                <Play className="w-4 h-4 fill-white" />
                 <span>WATCH ANIME</span>
               </button>
 
@@ -292,7 +292,7 @@ export function Anime() {
                 }
                 className="py-2.5 px-6 rounded-xl bg-black/50 hover:bg-black/70 border border-white/20 text-white text-xs sm:text-sm font-bold tracking-wide transition-colors flex items-center gap-2 cursor-pointer"
               >
-                <Info className="w-4 h-4 text-[#F5C518]" />
+                <Info className="w-4 h-4 text-neutral-300" />
                 <span>Details &amp; Cast</span>
               </button>
             </div>
@@ -306,7 +306,7 @@ export function Anime() {
                 setHeroIndex((prev) => (prev - 1 + heroAnime.length) % heroAnime.length)
               }
               aria-label="Previous featured anime"
-              className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all cursor-pointer shadow active:scale-95"
+              className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer shadow active:scale-95"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -314,7 +314,7 @@ export function Anime() {
               type="button"
               onClick={() => setHeroIndex((prev) => (prev + 1) % heroAnime.length)}
               aria-label="Next featured anime"
-              className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#F5C518] text-white hover:text-black border border-white/10 flex items-center justify-center transition-all cursor-pointer shadow active:scale-95"
+              className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#E50914] text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer shadow active:scale-95"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -331,7 +331,7 @@ export function Anime() {
               onClick={() => handleTabChange('all')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'all'
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/20 font-extrabold scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/40 font-extrabold scale-105'
                   : 'text-neutral-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -344,7 +344,7 @@ export function Anime() {
               onClick={() => handleTabChange('movies')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'movies'
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/20 font-extrabold scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/40 font-extrabold scale-105'
                   : 'text-neutral-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -357,7 +357,7 @@ export function Anime() {
               onClick={() => handleTabChange('series')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'series'
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/20 font-extrabold scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/40 font-extrabold scale-105'
                   : 'text-neutral-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -370,7 +370,7 @@ export function Anime() {
               onClick={() => handleTabChange('others')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                 activeTab === 'others'
-                  ? 'bg-[#F5C518] text-black shadow-lg shadow-[#F5C518]/20 font-extrabold scale-105'
+                  ? 'bg-[#E50914] text-white shadow-lg shadow-red-900/40 font-extrabold scale-105'
                   : 'text-neutral-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -387,7 +387,7 @@ export function Anime() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search anime title..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#16171E] border border-white/5 focus:border-[#F5C518] text-xs sm:text-sm text-white placeholder-neutral-500 outline-hidden transition-all shadow-inner"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#16171E] border border-white/5 focus:border-[#E50914] text-xs sm:text-sm text-white placeholder-neutral-500 outline-hidden transition-all shadow-inner"
             />
             {searchQuery && (
               <button
@@ -414,7 +414,7 @@ export function Anime() {
                   onClick={() => setSelectedGenre(g)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                     active
-                      ? 'bg-white/20 text-[#F5C518] font-bold border border-[#F5C518]/40'
+                      ? 'bg-[#E50914] text-white font-bold shadow shadow-red-900/40'
                       : 'bg-[#16171E] text-neutral-400 hover:text-white hover:bg-white/5 border border-white/5'
                   }`}
                 >
@@ -430,7 +430,7 @@ export function Anime() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="px-3 py-1.5 rounded-xl bg-[#16171E] border border-white/10 text-xs font-semibold text-neutral-300 focus:border-[#F5C518] outline-hidden cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-[#16171E] border border-white/10 text-xs font-semibold text-neutral-300 focus:border-[#E50914] outline-hidden cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="RELEASING">Airing / Releasing</option>
@@ -442,7 +442,7 @@ export function Anime() {
             <select
               value={activeSort}
               onChange={(e) => setActiveSort(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-[#16171E] border border-white/10 text-xs font-semibold text-neutral-300 focus:border-[#F5C518] outline-hidden cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-[#16171E] border border-white/10 text-xs font-semibold text-neutral-300 focus:border-[#E50914] outline-hidden cursor-pointer"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.id} value={opt.id}>
@@ -457,7 +457,7 @@ export function Anime() {
       {/* Anime Grid */}
       {loading ? (
         <div className="py-24 text-center">
-          <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
             Loading Anime from AniList...
           </span>

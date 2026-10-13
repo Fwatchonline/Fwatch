@@ -2,9 +2,9 @@
 
 @layer base {
   :root {
-    --accent: #F5C518;
-    --accent-hover: #E5B508;
-    --accent-glow: rgba(245, 197, 24, 0.35);
+    --accent: #E50914;
+    --accent-hover: #b81d24;
+    --accent-glow: rgba(229, 9, 20, 0.4);
     --bg-dark: #0E0F12;
     --surface-dark: #14151A;
     --card-dark: #1A1B22;
@@ -31,7 +31,7 @@
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #F5C518;
+    background: #E50914;
   }
 }
 
@@ -65,7 +65,7 @@
 
 /* Glow effects */
 .glow-accent {
-  box-shadow: 0 0 25px -4px rgba(245, 197, 24, 0.35);
+  box-shadow: 0 0 25px -4px rgba(229, 9, 20, 0.4);
 }
 
 .glow-subtle {
@@ -74,5 +74,5 @@
 
 /* Range input styling for video player */
 input[type="range"] {
-  accent-color: #F5C518;
+  accent-color: #E50914;
 }

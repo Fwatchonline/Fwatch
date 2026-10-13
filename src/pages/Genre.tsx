@@ -57,7 +57,7 @@ export function Genre() {
   if (loading && mediaItems.length === 0) {
     return (
       <div className="min-h-screen bg-[#08090c] pt-28 pb-16 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#F5C518] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-[#E50914] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -66,7 +66,7 @@ export function Genre() {
     return (
       <div className="min-h-screen bg-[#08090c] pt-28 pb-16 max-w-7xl mx-auto px-4 text-center">
         <h2 className="text-2xl font-bold text-white mb-2">Genre Not Found</h2>
-        <Link to="/genres" className="text-[#F5C518] font-semibold hover:underline">
+        <Link to="/genres" className="text-[#E50914] font-semibold hover:underline">
           View All Genres
         </Link>
       </div>
@@ -76,8 +76,8 @@ export function Genre() {
   return (
     <div className="min-h-screen bg-[#08090c] pt-24 pb-16">
       <SEO
-        title={`${currentGenre.name} Movies & Series - Watch Online | T.Movie`}
-        description={`Stream the highest rated and trending ${currentGenre.name} movies and TV shows in 4K on T.Movie.`}
+        title={`${currentGenre.name} Movies & Series - Watch Online | Tstream`}
+        description={`Stream the highest rated and trending ${currentGenre.name} movies and TV shows in 4K on Tstream.`}
         breadcrumbs={[
           { name: 'Home', item: '/' },
           { name: 'Genres', item: '/genres' },
@@ -103,7 +103,7 @@ export function Genre() {
             </p>
           </div>
 
-          <span className="px-3 py-1 bg-[#F5C518]/20 border border-[#F5C518]/40 text-[#F5C518] text-xs font-bold rounded-full">
+          <span className="px-3 py-1 bg-red-950/60 border border-red-500/30 text-[#E50914] text-xs font-bold rounded-full">
             {totalItems || mediaItems.length} Titles Available
           </span>
         </div>

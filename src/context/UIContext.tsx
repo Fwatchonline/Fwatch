@@ -1,14 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { tmdbService } from '../services/tmdb';
 
-interface NotificationItem {
+export interface NotificationItem {
   id: string;
   title: string;
   mediaTitle: string;
+  episodeName?: string;
   type: 'episode' | 'movie' | 'system';
   time: string;
   image: string;
   read: boolean;
   link: string;
+  seasonNumber?: number;
+  episodeNumber?: number;
 }
 
 interface UIContextType {
@@ -21,52 +25,10 @@ interface UIContextType {
   setNotificationsOpen: (v: boolean) => void;
   notifications: NotificationItem[];
   markAllNotificationsRead: () => void;
+  markNotificationRead: (id: string) => void;
   userDropdownOpen: boolean;
   setUserDropdownOpen: (v: boolean) => void;
 }
-
-const initialNotifications: NotificationItem[] = [
-  {
-    id: '1',
-    title: 'Season 2, Episode 3 has been released.',
-    mediaTitle: 'The Lord of the Rings: The Rings of Power',
-    type: 'episode',
-    time: '2 hours ago',
-    image: 'https://image.tmdb.org/t/p/w300/mYLOqiStMxDK3fYZQl98457ExHO.jpg',
-    read: false,
-    link: '/tv/76479-the-lord-of-the-rings-the-rings-of-power/season/2/episode/3',
-  },
-  {
-    id: '2',
-    title: 'Episode 4, has been released.',
-    mediaTitle: 'Bad Monkey',
-    type: 'episode',
-    time: '5 hours ago',
-    image: 'https://image.tmdb.org/t/p/w300/49zoxL7u8cR9V4q70fK7U79s1wJ.jpg',
-    read: false,
-    link: '/tv/157202-bad-monkey/season/1/episode/4',
-  },
-  {
-    id: '3',
-    title: 'Episode 9, has been released.',
-    mediaTitle: 'Sunny',
-    type: 'episode',
-    time: '1 day ago',
-    image: 'https://image.tmdb.org/t/p/w300/87O4fXfK9yA2K7t2W6v8tM4K5.jpg',
-    read: true,
-    link: '/tv/194766-sunny/season/1/episode/9',
-  },
-  {
-    id: '4',
-    title: 'The film, has been released.',
-    mediaTitle: 'The Greatest Hits',
-    type: 'movie',
-    time: '2 days ago',
-    image: 'https://image.tmdb.org/t/p/w300/bAXMqn0j13o1c6P0aG2K9mZ7xYt.jpg',
-    read: true,
-    link: '/movie/1143183-the-greatest-hits',
-  },
-];
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
@@ -78,18 +40,66 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   const [plansModalOpen, setPlansModalOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(initialNotifications);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   useEffect(() => {
     localStorage.setItem('tmovie_sidebar_collapsed', String(sidebarCollapsed));
   }, [sidebarCollapsed]);
+
+  // Load live episodes airing today
+  useEffect(() => {
+    let mounted = true;
+    const readIds: string[] = JSON.parse(
+      localStorage.getItem('tmovie_read_notifications') || '[]'
+    );
+
+    tmdbService.getEpisodesAiringToday().then((todayEpisodes) => {
+      if (!mounted) return;
+      if (todayEpisodes && todayEpisodes.length > 0) {
+        const formatted: NotificationItem[] = todayEpisodes.map((ep) => ({
+          ...ep,
+          read: readIds.includes(ep.id),
+        }));
+        setNotifications(formatted);
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const toggleSidebar = () => {
     setSidebarCollapsed((prev) => !prev);
   };
 
   const markAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }));
+      try {
+        localStorage.setItem(
+          'tmovie_read_notifications',
+          JSON.stringify(updated.map((n) => n.id))
+        );
+      } catch {}
+      return updated;
+    });
+  };
+
+  const markNotificationRead = (id: string) => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
+      try {
+        const readIds: string[] = JSON.parse(
+          localStorage.getItem('tmovie_read_notifications') || '[]'
+        );
+        if (!readIds.includes(id)) {
+          readIds.push(id);
+          localStorage.setItem('tmovie_read_notifications', JSON.stringify(readIds));
+        }
+      } catch {}
+      return updated;
+    });
   };
 
   return (
@@ -104,6 +114,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
         setNotificationsOpen,
         notifications,
         markAllNotificationsRead,
+        markNotificationRead,
         userDropdownOpen,
         setUserDropdownOpen,
       }}
